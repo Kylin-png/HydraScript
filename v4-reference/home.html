@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Hydra Script — Projects</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366f1',
+            accent: '#8b5cf6',
+            'bg-dark': '#0d0e14',
+            'surface-dark': '#15161e',
+            'surface-light': '#ffffff',
+            'border-dark': '#2e2f3d',
+          },
+          fontFamily: { display: ['Inter', 'sans-serif'], sans: ['Inter', 'sans-serif'] },
+          borderRadius: { DEFAULT: '8px', md: '6px', lg: '10px' },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .grid-pattern {
+      background-image: linear-gradient(to right, #1a1b25 1px, transparent 1px),
+                        linear-gradient(to bottom, #1a1b25 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .modal { transition: opacity 0.25s ease; }
+    .template-card { transition: all 0.2s ease; }
+    .template-card:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body class="bg-bg-dark text-gray-300 min-h-screen flex flex-col font-display antialiased">
+
+  <!-- Nav -->
+  <nav class="bg-surface-dark border-b border-border-dark px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+        <i class="fas fa-dragon text-white text-lg"></i>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold text-white">Hydra Script</h1>
+        <p class="text-xs text-gray-500">Visual Game Development</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="import-project-btn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-dark border border-border-dark text-gray-400 hover:text-white hover:border-primary transition-all text-sm">
+        <i class="fas fa-upload"></i> Import
+      </button>
+      <input type="file" id="load-project-file" accept=".json" class="hidden">
+      <button id="export-all-btn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-dark border border-border-dark text-gray-400 hover:text-white hover:border-primary transition-all text-sm">
+        <i class="fas fa-download"></i> Export All
+      </button>
+      <button id="new-project-btn-main" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-accent text-white font-medium shadow-lg hover:shadow-primary/50 transition-all text-sm">
+        <i class="fas fa-plus"></i> New Project
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="flex-1 flex flex-col px-6 py-8 max-w-7xl mx-auto w-full">
+    <!-- Header -->
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-white mb-1">Your Projects</h2>
+        <p class="text-sm text-gray-500">Create, edit, and export visual games — all in your browser.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <input id="search-input" type="search" placeholder="Search projects..." class="px-4 py-2 rounded-lg bg-surface-dark border border-border-dark text-white text-sm focus:border-primary outline-none w-48">
+        <select id="sort-select" class="px-3 py-2 rounded-lg bg-surface-dark border border-border-dark text-gray-400 text-sm focus:border-primary outline-none">
+          <option value="modified">Last Modified</option>
+          <option value="name">Name</option>
+          <option value="created">Date Created</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Projects Grid -->
+    <div id="projects-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="hidden text-center py-20">
+      <div class="w-20 h-20 rounded-full bg-surface-dark mx-auto flex items-center justify-center mb-6">
+        <i class="fas fa-folder-open text-3xl text-gray-600"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-400 mb-2">No projects yet</h3>
+      <p class="text-sm text-gray-600 mb-6">Create your first game with Hydra Script</p>
+      <button onclick="document.getElementById('new-project-btn-main').click()" class="px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-accent text-white font-medium shadow-lg hover:shadow-primary/50 transition-all">
+        Create New Project
+      </button>
+    </div>
+  </main>
+
+  <!-- New Project Wizard -->
+  <div id="new-project-wizard-overlay" class="fixed inset-0 z-[100] hidden bg-black/80 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300 opacity-0">
+    <div id="wizard-container" class="bg-surface-dark w-full max-w-4xl h-[80vh] rounded-xl shadow-2xl flex flex-col border border-border-dark transform scale-95 transition-transform duration-300">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-border-dark">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+            <i class="fas fa-magic text-white text-sm"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">New Project</h2>
+            <p class="text-xs text-gray-500">Choose a template to get started</p>
+          </div>
+        </div>
+        <button id="close-wizard-btn" class="text-gray-500 hover:text-white transition-colors p-2">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="flex-1 flex overflow-hidden">
+        <div class="w-64 bg-bg-dark border-r border-border-dark p-6 flex flex-col gap-6">
+          <div class="flex items-center gap-3 text-primary">
+            <div class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">1</div>
+            <span class="text-sm font-medium">Project Name</span>
+          </div>
+          <div class="flex items-center gap-3 text-gray-500">
+            <div class="w-7 h-7 rounded-full border-2 border-gray-700 flex items-center justify-center text-xs font-bold">2</div>
+            <span class="text-sm">Template</span>
+          </div>
+          <div class="mt-auto p-4 bg-primary/10 rounded-lg border border-primary/20">
+            <p class="text-xs text-primary/80 leading-relaxed">
+              <i class="fas fa-info-circle mr-1"></i>
+              Hydra Script runs entirely in your browser. Projects are saved locally and can be exported anytime.
+            </p>
+          </div>
+        </div>
+        <div class="flex-1 p-8 overflow-y-auto">
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Project Name</label>
+            <input id="project-name-input" type="text" placeholder="e.g., Cyberpunk Platformer" required
+              class="w-full bg-bg-dark border border-border-dark rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-primary focus:border-transparent placeholder-gray-600 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-3">Choose a Template</label>
+            <div id="template-selector" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-border-dark flex items-center justify-between">
+        <button id="cancel-wizard-btn" class="px-4 py-2 text-gray-500 hover:text-white transition-colors text-sm">Cancel</button>
+        <button id="create-project-btn" class="px-6 py-2.5 rounded-lg bg-gradient-to-r from-primary to-accent text-white font-medium shadow-lg hover:shadow-primary/50 transition-all text-sm">
+          Create Project <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="hydra-core.js"></script>
+  <script src="hydra-templates.js"></script>
+  <script>
+    // Home page logic
+    document.addEventListener('DOMContentLoaded', function () {
+      const projectsList = document.getElementById('projects-list');
+      const emptyState = document.getElementById('empty-state');
+      const newProjectBtn = document.getElementById('new-project-btn-main');
+      const wizardOverlay = document.getElementById('new-project-wizard-overlay');
+      const wizardContainer = document.getElementById('wizard-container');
+      const closeWizardBtn = document.getElementById('close-wizard-btn');
+      const cancelWizardBtn = document.getElementById('cancel-wizard-btn');
+      const createProjectBtn = document.getElementById('create-project-btn');
+      const projectNameInput = document.getElementById('project-name-input');
+      const templateSelector = document.getElementById('template-selector');
+      const importBtn = document.getElementById('import-project-btn');
+      const loadProjectFile = document.getElementById('load-project-file');
+      const exportAllBtn = document.getElementById('export-all-btn');
+      const searchInput = document.getElementById('search-input');
+      const sortSelect = document.getElementById('sort-select');
+
+      let projects = loadProjects();
+      let selectedTemplate = 'blank';
+      renderTemplates();
+      renderProjects();
+
+      // Events
+      newProjectBtn.addEventListener('click', () => toggleWizard(true));
+      closeWizardBtn.addEventListener('click', () => toggleWizard(false));
+      cancelWizardBtn.addEventListener('click', () => toggleWizard(false));
+      createProjectBtn.addEventListener('click', createProject);
+      importBtn.addEventListener('click', () => loadProjectFile.click());
+      loadProjectFile.addEventListener('change', importProject);
+      exportAllBtn.addEventListener('click', exportAllProjects);
+      searchInput.addEventListener('input', () => renderProjects(searchInput.value));
+      sortSelect.addEventListener('change', () => renderProjects(searchInput.value));
+
+      function toggleWizard(show) {
+        if (show) {
+          wizardOverlay.classList.remove('hidden');
+          setTimeout(() => { wizardOverlay.classList.add('opacity-100'); wizardContainer.classList.remove('scale-95'); wizardContainer.classList.add('scale-100'); }, 10);
+          projectNameInput.focus();
+        } else {
+          wizardOverlay.classList.remove('opacity-100');
+          wizardContainer.classList.remove('scale-100');
+          wizardContainer.classList.add('scale-95');
+          setTimeout(() => wizardOverlay.classList.add('hidden'), 300);
+        }
+      }
+
+      function renderTemplates() {
+        const templates = window.HydraTemplates ? window.HydraTemplates.getTemplateList() : [];
+        templateSelector.innerHTML = '';
+        templates.forEach((t) => {
+          const card = document.createElement('button');
+          card.type = 'button';
+          card.className = 'template-card border-2 rounded-lg p-4 text-left';
+          card.dataset.template = t.id;
+          card.innerHTML = `
+            <span class="material-icons text-2xl mb-2 block" style="color: ${t.id === selectedTemplate ? '#6366f1' : '#6b6c80'}">${t.icon}</span>
+            <h4 class="font-medium text-white text-sm">${t.name}</h4>
+            <p class="text-xs text-gray-500 mt-1">${t.description}</p>
+          `;
+          if (t.id === selectedTemplate) {
+            card.classList.add('border-primary', 'bg-primary/10');
+          } else {
+            card.classList.add('border-border-dark', 'hover:border-primary');
+          }
+          card.addEventListener('click', () => {
+            selectedTemplate = t.id;
+            renderTemplates();
+          });
+          templateSelector.appendChild(card);
+        });
+      }
+
+      function loadProjects() {
+        try { return JSON.parse(localStorage.getItem('hydraProjects') || '[]'); }
+        catch { return []; }
+      }
+
+      function saveProjects(projs) {
+        try { localStorage.setItem('hydraProjects', JSON.stringify(projs)); }
+        catch { alert('Failed to save — storage may be full.'); }
+      }
+
+      function renderProjects(filter = '') {
+        const q = filter.trim().toLowerCase();
+        let filtered = projects.filter((p) => p.name?.toLowerCase().includes(q));
+
+        const sortBy = sortSelect.value;
+        if (sortBy === 'name') filtered.sort((a, b) => a.name.localeCompare(b.name));
+        else if (sortBy === 'created') filtered.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
+        else filtered.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+
+        projectsList.innerHTML = '';
+        if (!filtered.length) { emptyState.classList.remove('hidden'); return; }
+        emptyState.classList.add('hidden');
+
+        filtered.forEach((project) => {
+          const hue = parseInt(project.id?.substring(0, 6) || '210', 16) % 360 || 210;
+          const sceneCount = project.scenes?.length || 0;
+          const name = project.name || 'Untitled';
+          const modified = formatTime(project.lastModified);
+
+          const card = document.createElement('div');
+          card.className = 'group relative bg-surface-dark rounded-xl border border-border-dark hover:border-primary transition-all duration-200 flex flex-col overflow-hidden hover:shadow-lg';
+          card.innerHTML = `
+            <div class="relative h-36 border-b border-border-dark" style="background: linear-gradient(135deg, hsl(${hue}, 70%, 50%), hsl(${(hue + 40) % 360}, 70%, 40%))">
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-5xl font-light text-white/80">${name.charAt(0).toUpperCase()}</span>
+              </div>
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                <button class="bg-primary text-white px-5 py-2 rounded-lg text-sm font-medium shadow-lg open-btn">Open Editor</button>
+              </div>
+            </div>
+            <div class="p-4 flex-1 flex flex-col">
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="text-base font-semibold text-white truncate">${name}</h3>
+                <span class="text-[10px] font-mono bg-bg-dark text-gray-500 px-1.5 py-0.5 rounded border border-border-dark">v4</span>
+              </div>
+              <p class="text-xs text-gray-600 mb-4">${sceneCount} scene${sceneCount !== 1 ? 's' : ''} · ${modified}</p>
+              <div class="mt-auto flex items-center justify-between pt-3 border-t border-border-dark">
+                <div class="flex items-center text-gray-600"><i class="fas fa-folder text-sm"></i></div>
+                <div class="flex items-center gap-3">
+                  <button class="text-gray-500 hover:text-primary transition-colors rename-btn" title="Rename"><i class="fas fa-edit text-sm"></i></button>
+                  <button class="text-gray-500 hover:text-accent transition-colors export-btn" title="Export"><i class="fas fa-download text-sm"></i></button>
+                  <button class="text-gray-500 hover:text-red-400 transition-colors delete-btn" title="Delete"><i class="fas fa-trash text-sm"></i></button>
+                </div>
+              </div>
+            </div>
+          `;
+          card.querySelector('.open-btn').addEventListener('click', () => openProject(project.id));
+          card.addEventListener('click', (e) => { if (!e.target.closest('button')) openProject(project.id); });
+          card.querySelector('.rename-btn').addEventListener('click', (e) => { e.stopPropagation(); renameProject(project.id); });
+          card.querySelector('.export-btn').addEventListener('click', (e) => { e.stopPropagation(); exportProject(project.id); });
+          card.querySelector('.delete-btn').addEventListener('click', (e) => { e.stopPropagation(); deleteProject(project.id); });
+          projectsList.appendChild(card);
+        });
+      }
+
+      function openProject(id) {
+        localStorage.setItem('currentProjectId', id);
+        window.location.href = 'index.html?v4';
+      }
+
+      function renameProject(id) {
+        const p = projects.find((p) => p.id === id);
+        if (!p) return;
+        const name = prompt('Project name:', p.name);
+        if (name && name.trim()) {
+          p.name = name.trim();
+          p.lastModified = new Date().toISOString();
+          saveProjects(projects);
+          renderProjects(searchInput.value);
+        }
+      }
+
+      function deleteProject(id) {
+        if (!confirm('Delete this project? This cannot be undone.')) return;
+        projects = projects.filter((p) => p.id !== id);
+        saveProjects(projects);
+        renderProjects(searchInput.value);
+      }
+
+      function exportProject(id) {
+        const p = projects.find((p) => p.id === id);
+        if (!p) return;
+        const blob = new Blob([JSON.stringify(p, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${(p.name || 'project').replace(/[^a-z0-9_-]+/gi, '_')}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      function exportAllProjects() {
+        const blob = new Blob([JSON.stringify(projects, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'hydrascript_projects_backup.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      function importProject(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const p = JSON.parse(ev.target.result);
+            if (window.HydraCore) window.HydraCore.normalizeProject(p);
+            projects.push(p);
+            saveProjects(projects);
+            renderProjects(searchInput.value);
+            alert('Project imported successfully!');
+          } catch { alert('Invalid project file.'); }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      }
+
+      function createProject() {
+        const name = projectNameInput.value.trim() || 'Untitled Project';
+        const project = window.HydraTemplates ? window.HydraTemplates.buildTemplate(selectedTemplate) : window.HydraCore.createProject(name);
+        project.name = name;
+        project.dateCreated = new Date().toISOString();
+        project.lastModified = new Date().toISOString();
+        if (window.HydraCore) window.HydraCore.normalizeProject(project);
+        projects.push(project);
+        saveProjects(projects);
+        localStorage.setItem('currentProjectId', project.id);
+        window.location.href = 'index.html?v4';
+      }
+
+      function formatTime(iso) {
+        const d = new Date(iso);
+        const now = new Date();
+        const diff = (now - d) / 1000;
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+        if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+        return d.toLocaleDateString();
+      }
+    });
+  </script>
+</body>
+</html>

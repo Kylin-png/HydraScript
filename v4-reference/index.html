@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hydra Script — Visual Game Development</title>
+  <link rel="stylesheet" href="style.css?v4">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="app-loading-screen">
+    <div class="loading-content">
+      <div class="loading-logo">
+        <span class="loading-logo-icon"><i class="fas fa-dragon"></i></span>
+        <span class="loading-logo-text">Hydra Script</span>
+      </div>
+      <div class="loading-status-container">
+        <div class="loading-text" id="loading-status">Initializing Engine...</div>
+        <div class="loading-progress-bg">
+          <div class="loading-progress-fill" id="loading-progress-bar"></div>
+        </div>
+        <div class="loading-subtext" id="loading-subtext">Loading core modules...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <span class="logo-icon"><i class="fas fa-dragon"></i></span>
+      <h1>Hydra Script</h1>
+    </div>
+    <div class="project-controls">
+      <div class="project-info">
+        <span class="project-label">Project</span>
+        <span id="project-name" contenteditable="true" title="Click to rename">Untitled Project</span>
+      </div>
+      <div class="project-actions">
+        <button id="save-project-btn" title="Save (Ctrl+S)"><i class="fas fa-save"></i> <span>Save</span></button>
+        <button id="export-playable-btn" title="Export as playable HTML"><i class="fas fa-file-export"></i> <span>Export</span></button>
+        <button id="home-btn" title="Project Hub"><i class="fas fa-home"></i> <span>Home</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="scene-tab"><i class="fas fa-cubes"></i> <span>Scene</span></div>
+    <div class="tab" data-tab="script-tab"><i class="fas fa-code-branch"></i> <span>Logic</span></div>
+    <div class="tab" data-tab="preview-tab"><i class="fas fa-play-circle"></i> <span>Preview</span></div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- ========== SCENE EDITOR ========== -->
+    <div class="tab-content active" id="scene-tab">
+      <div class="scene-editor">
+        <div class="scene-container" tabindex="0">
+          <div class="scene-toolbar">
+            <div class="scene-switcher">
+              <select id="scene-switcher-select" title="Switch scene"></select>
+              <button class="scene-tool-btn" id="scene-rename-btn" title="Rename scene"><i class="fas fa-edit"></i></button>
+              <button class="scene-tool-btn" id="scene-toolbar-add-btn" title="Add scene"><i class="fas fa-plus"></i></button>
+              <button class="scene-tool-btn danger" id="scene-toolbar-delete-btn" title="Delete scene"><i class="fas fa-times"></i></button>
+            </div>
+            <span class="scene-tool-divider"></span>
+            <button class="scene-tool-btn active" id="scene-snap-btn" title="Snap to grid"><i class="fas fa-magnet"></i></button>
+            <button class="scene-tool-btn" id="scene-zoom-out-btn" title="Zoom out"><i class="fas fa-search-minus"></i></button>
+            <span class="scene-zoom-readout" id="scene-zoom-readout">100%</span>
+            <button class="scene-tool-btn" id="scene-zoom-in-btn" title="Zoom in"><i class="fas fa-search-plus"></i></button>
+            <span class="scene-tool-divider"></span>
+            <button class="scene-tool-btn" id="scene-duplicate-btn" title="Duplicate (Ctrl+D)"><i class="fas fa-clone"></i></button>
+            <button class="scene-tool-btn" id="scene-center-btn" title="Center object"><i class="fas fa-crosshairs"></i></button>
+            <button class="scene-tool-btn danger" id="scene-delete-btn" title="Delete (Del)"><i class="fas fa-trash"></i></button>
+          </div>
+          <div class="scene" id="scene-canvas"></div>
+        </div>
+
+        <div class="scene-side-panel">
+          <div class="inspector-tabs">
+            <button type="button" class="inspector-tab active" data-inspector-tab="scenes"><i class="fas fa-film"></i><span>Scenes</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="objects"><i class="fas fa-sitemap"></i><span>Hierarchy</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="world"><i class="fas fa-sliders-h"></i><span>World</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="create"><i class="fas fa-plus"></i><span>Create</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="inspect"><i class="fas fa-edit"></i><span>Inspect</span></button>
+          </div>
+
+          <!-- Scenes -->
+          <div class="inspector-panel active" data-inspector-panel="scenes">
+            <div class="panel-section-header">
+              <h3>Scenes</h3>
+              <button id="add-scene-btn" class="icon-btn" title="Add Scene"><i class="fas fa-plus"></i></button>
+            </div>
+            <div id="scene-list" class="scene-list"></div>
+          </div>
+
+          <!-- Hierarchy -->
+          <div class="inspector-panel" data-inspector-panel="objects">
+            <div class="panel-section-header">
+              <h3>Hierarchy</h3>
+              <span class="panel-count" id="scene-object-count">0</span>
+            </div>
+            <div class="hierarchy-search-wrap">
+              <i class="fas fa-search"></i>
+              <input id="entity-search" type="search" placeholder="Search entities">
+            </div>
+            <div id="scene-object-list" class="scene-object-list"></div>
+          </div>
+
+          <!-- World Settings -->
+          <div class="inspector-panel" data-inspector-panel="world">
+            <h3 style="margin-bottom:12px">Scene Settings</h3>
+            <div class="prop-group">
+              <label>Background Color</label>
+              <input type="color" id="scene-bg-color" class="property-input" style="height:36px" value="#1a1a2e">
+            </div>
+            <div class="prop-group">
+              <label>Background Image</label>
+              <button class="upload-btn" id="scene-bg-upload-btn"><i class="fas fa-image"></i> Upload</button>
+              <input type="file" id="scene-bg-file" accept="image/*" style="display:none">
+              <button class="clear-btn" id="scene-bg-clear-btn" style="display:none"><i class="fas fa-times"></i> Clear</button>
+            </div>
+            <div class="prop-group">
+              <label>World Width</label>
+              <input type="number" id="scene-width" class="property-input" value="800" min="100" max="4000" step="10">
+            </div>
+            <div class="prop-group">
+              <label>World Height</label>
+              <input type="number" id="scene-height" class="property-input" value="600" min="100" max="4000" step="10">
+            </div>
+            <div class="prop-group">
+              <label>Viewport Width</label>
+              <input type="number" id="scene-viewport-width" class="property-input" value="800" min="100" max="4000" step="10">
+            </div>
+            <div class="prop-group">
+              <label>Viewport Height</label>
+              <input type="number" id="scene-viewport-height" class="property-input" value="600" min="100" max="4000" step="10">
+            </div>
+          </div>
+
+          <!-- Create -->
+          <div class="inspector-panel" data-inspector-panel="create">
+            <div class="panel-section-header">
+              <h3>Create</h3>
+            </div>
+            <div class="object-create-grid">
+              <button type="button" class="object-create-btn" data-create-kind="sprite"><i class="fas fa-square"></i> Sprite</button>
+              <button type="button" class="object-create-btn" data-create-kind="text"><i class="fas fa-font"></i> Text</button>
+              <button type="button" class="object-create-btn" data-create-kind="button"><i class="fas fa-hand-pointer"></i> Button</button>
+              <button type="button" class="object-create-btn" data-create-kind="empty"><i class="far fa-circle"></i> Empty</button>
+              <button type="button" class="object-create-btn" data-create-kind="camera3d"><i class="fas fa-video"></i> Camera</button>
+              <button type="button" class="object-create-btn" data-create-kind="light3d"><i class="fas fa-lightbulb"></i> Light</button>
+            </div>
+            <div class="add-object-row">
+              <select id="new-object-kind" class="property-input">
+                <option value="sprite">Sprite / Shape</option>
+                <option value="text">Text</option>
+                <option value="button">Button</option>
+                <option value="empty">Empty Entity</option>
+                <option value="camera3d">3D Camera</option>
+                <option value="light3d">3D Light</option>
+              </select>
+              <button id="add-object-btn" class="icon-btn" title="Add at center"><i class="fas fa-plus"></i></button>
+            </div>
+            <p class="hint-text">Add entities to your scene, then attach components and logic in the Logic tab.</p>
+          </div>
+
+          <!-- Inspector -->
+          <div class="inspector-panel" data-inspector-panel="inspect">
+            <div id="object-properties">
+              <p class="hint-text">Click an object in the scene to inspect it.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== LOGIC EDITOR ========== -->
+    <div class="tab-content" id="script-tab">
+      <div class="script-editor">
+        <!-- Block Palette -->
+        <div class="script-left-panel">
+          <div class="scope-tabs" id="scope-tabs"></div>
+          <div class="scope-info" id="scope-info">Global script runs across ALL scenes</div>
+          <input type="search" class="property-input block-search" id="block-search" placeholder="Search blocks..." style="margin:8px;border-radius:4px">
+          <div class="block-palette" id="block-type-panel"></div>
+        </div>
+
+        <!-- Grid Editor -->
+        <div class="grid-editor-container">
+          <div class="command-bar">
+            <button class="command-btn" id="clear-grid-btn"><i class="fas fa-eraser"></i> Clear All</button>
+            <div class="logic-view-toggle">
+              <button class="command-btn active" id="logic-view-grid-btn"><i class="fas fa-th"></i> Grid</button>
+              <button class="command-btn" id="logic-view-events-btn"><i class="fas fa-list"></i> Events</button>
+            </div>
+          </div>
+          <div class="grid-wrapper" id="grid-wrapper">
+            <div class="grid-editor" id="grid-editor"></div>
+          </div>
+          <div class="event-sheet" id="event-sheet" style="display:none"></div>
+        </div>
+
+        <!-- Properties Panel -->
+        <div class="script-right-panel">
+          <div class="panel-title"><i class="fas fa-sliders-h"></i> Block Properties</div>
+          <div class="panel-body" id="properties-content">
+            <p class="hint-text">Select a block in the grid to edit its properties.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PREVIEW ========== -->
+    <div class="tab-content" id="preview-tab">
+      <div class="preview-container" id="preview-container">
+        <div class="preview-empty">
+          <i class="fas fa-play-circle"></i>
+          <p>Click Preview to run your game</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts (load order matters) -->
+  <script src="hydra-core.js"></script>
+  <script src="hydra-blocks.js"></script>
+  <script src="hydra-engine.js"></script>
+  <script src="hydra-templates.js"></script>
+  <script src="hydra-editor.js"></script>
+</body>
+</html>

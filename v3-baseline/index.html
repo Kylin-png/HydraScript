@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hydra Script - Visual Game Development</title>
+  <link rel="stylesheet" href="style.css?v=20260517-rebuild1">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="app-loading-screen">
+    <div class="loading-content">
+      <div class="loading-logo">
+        <span class="loading-logo-icon"><i class="fas fa-project-diagram"></i></span>
+        <span class="loading-logo-text">Hydra Script</span>
+      </div>
+      <div class="loading-status-container">
+        <div class="loading-text" id="loading-status">Initializing Engine...</div>
+        <div class="loading-progress-bg">
+          <div class="loading-progress-fill" id="loading-progress-bar"></div>
+        </div>
+        <div class="loading-subtext" id="loading-subtext">Loading core modules...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <span class="logo-icon"><i class="fas fa-project-diagram"></i></span>
+      <h1>Hydra Script</h1>
+    </div>
+    <div class="project-controls">
+      <div class="project-info">
+        <span class="project-label">Project</span>
+        <span id="project-name" contenteditable="true" title="Click to rename">Untitled Project</span>
+      </div>
+      <div class="project-actions">
+        <button id="save-project-btn" title="Save Project"><i class="fas fa-save"></i> Save</button>
+        <button id="export-playable-btn" title="Export playable HTML"><i class="fas fa-file-export"></i> Export Game</button>
+        <button id="home-btn" title="Return to Home"><i class="fas fa-home"></i> Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="scene-tab"><i class="fas fa-cubes"></i> Scene / Entities</div>
+    <div class="tab" data-tab="script-tab"><i class="fas fa-code-branch"></i> Logic</div>
+    <div class="tab" data-tab="preview-tab"><i class="fas fa-play-circle"></i> Preview</div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- ========== SCENE EDITOR TAB ========== -->
+    <div class="tab-content active" id="scene-tab">
+      <div class="scene-editor">
+        <div class="scene-container" tabindex="0">
+          <div class="scene-toolbar" aria-label="Scene tools">
+            <div class="scene-switcher">
+              <select id="scene-switcher-select" title="Switch scene"></select>
+              <button class="scene-tool-btn" id="scene-rename-btn" title="Rename scene"><i class="fas fa-edit"></i></button>
+              <button class="scene-tool-btn" id="scene-toolbar-add-btn" title="Add scene"><i class="fas fa-plus"></i></button>
+              <button class="scene-tool-btn danger" id="scene-toolbar-delete-btn" title="Delete scene"><i class="fas fa-times"></i></button>
+            </div>
+            <span class="scene-tool-divider"></span>
+            <button class="scene-tool-btn active" id="scene-snap-btn" title="Toggle snap to grid"><i class="fas fa-magnet"></i></button>
+            <button class="scene-tool-btn" id="scene-zoom-out-btn" title="Zoom out"><i class="fas fa-search-minus"></i></button>
+            <span class="scene-zoom-readout" id="scene-zoom-readout">100%</span>
+            <button class="scene-tool-btn" id="scene-zoom-in-btn" title="Zoom in"><i class="fas fa-search-plus"></i></button>
+            <span class="scene-tool-divider"></span>
+            <button class="scene-tool-btn" id="scene-duplicate-btn" title="Duplicate selected object"><i class="fas fa-clone"></i></button>
+            <button class="scene-tool-btn" id="scene-center-btn" title="Center selected object"><i class="fas fa-crosshairs"></i></button>
+            <button class="scene-tool-btn" id="scene-front-btn" title="Bring forward"><i class="fas fa-layer-group"></i></button>
+            <button class="scene-tool-btn" id="scene-back-btn" title="Send backward"><i class="fas fa-level-down-alt"></i></button>
+            <button class="scene-tool-btn danger" id="scene-delete-btn" title="Delete selected object"><i class="fas fa-trash"></i></button>
+          </div>
+          <div class="scene" id="scene-canvas"></div>
+        </div>
+
+        <div class="scene-side-panel">
+          <div class="inspector-tabs" id="scene-inspector-tabs">
+            <button type="button" class="inspector-tab active" data-inspector-tab="scenes"><i class="fas fa-film"></i><span>Scenes</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="objects"><i class="fas fa-sitemap"></i><span>Hierarchy</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="world"><i class="fas fa-sliders-h"></i><span>World</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="create"><i class="fas fa-plus"></i><span>Create</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="inspect"><i class="fas fa-edit"></i><span>Inspector</span></button>
+          </div>
+
+          <!-- Scene List -->
+          <div class="panel-section inspector-panel active" data-inspector-panel="scenes">
+            <div class="panel-section-header">
+              <h3>Scenes</h3>
+              <button id="add-scene-btn" class="icon-btn" title="Add Scene"><i class="fas fa-plus"></i></button>
+            </div>
+            <div id="scene-list" class="scene-list"></div>
+          </div>
+
+          <!-- Object list -->
+          <div class="panel-section inspector-panel" data-inspector-panel="objects">
+            <div class="panel-section-header">
+              <h3>Hierarchy</h3>
+              <span class="panel-count" id="scene-object-count">0</span>
+            </div>
+            <div class="hierarchy-search-wrap">
+              <i class="fas fa-search"></i>
+              <input id="entity-search" type="search" placeholder="Search entities">
+            </div>
+            <div id="scene-object-list" class="scene-object-list"></div>
+          </div>
+
+          <!-- Scene settings -->
+          <div class="panel-section inspector-panel" id="scene-settings-panel" data-inspector-panel="world">
+            <h3>Scene Settings</h3>
+            <div class="prop-group">
+              <label>Background Color</label>
+              <input type="color" id="scene-bg-color" class="property-input" style="height:36px;" value="#ffffff">
+            </div>
+            <div class="prop-group">
+              <label>Background Image</label>
+              <button class="upload-btn" id="scene-bg-upload-btn"><i class="fas fa-image"></i> Upload Image</button>
+              <input type="file" id="scene-bg-file" accept="image/*" style="display:none">
+              <button class="clear-btn" id="scene-bg-clear-btn" style="display:none"><i class="fas fa-times"></i> Clear</button>
+            </div>
+            <div class="prop-group">
+              <label>Canvas Width</label>
+              <input type="number" id="scene-width" class="property-input" value="800" min="100" max="4000" step="10">
+            </div>
+            <div class="prop-group">
+              <label>Canvas Height</label>
+              <input type="number" id="scene-height" class="property-input" value="600" min="100" max="4000" step="10">
+            </div>
+            <div class="prop-group">
+              <label>Viewport Width</label>
+              <input type="number" id="scene-viewport-width" class="property-input" value="800" min="100" max="4000" step="10">
+            </div>
+            <div class="prop-group">
+              <label>Viewport Height</label>
+              <input type="number" id="scene-viewport-height" class="property-input" value="600" min="100" max="4000" step="10">
+            </div>
+          </div>
+
+          <!-- Add Object -->
+          <div class="panel-section inspector-panel" data-inspector-panel="create">
+            <div class="panel-section-header">
+              <h3>Create</h3>
+            </div>
+            <div class="object-create-grid">
+              <button type="button" class="object-create-btn" data-create-kind="empty" draggable="true"><i class="far fa-circle"></i> Empty</button>
+              <button type="button" class="object-create-btn" data-create-kind="sprite" draggable="true"><i class="fas fa-square"></i> Sprite</button>
+              <button type="button" class="object-create-btn" data-create-kind="text" draggable="true"><i class="fas fa-font"></i> Text</button>
+              <button type="button" class="object-create-btn" data-create-kind="button" draggable="true"><i class="fas fa-mouse-pointer"></i> Button</button>
+              <button type="button" class="object-create-btn" data-create-kind="camera3d" draggable="true"><i class="fas fa-video"></i> Camera 3D</button>
+              <button type="button" class="object-create-btn" data-create-kind="light3d" draggable="true"><i class="fas fa-lightbulb"></i> Light</button>
+            </div>
+            <div class="add-object-row">
+              <select id="new-object-kind" class="property-input">
+                <option value="empty">Empty Entity</option>
+                <option value="sprite">Sprite / Shape</option>
+                <option value="text">Text</option>
+                <option value="button">Button</option>
+                <option value="camera3d">3D Camera</option>
+                <option value="light3d">3D Light</option>
+              </select>
+              <button id="add-object-btn" class="icon-btn" title="Click on canvas to place, or add at center"><i class="fas fa-plus"></i> Add Entity</button>
+            </div>
+            <p class="hint-text">Entities can become web UI, 2D game objects, 3D actors, or pure logic containers by adding components.</p>
+          </div>
+
+          <!-- Object Properties -->
+          <div class="panel-section inspector-panel" id="obj-properties-section" data-inspector-panel="inspect">
+            <div class="panel-section-header">
+              <h3>Inspector</h3>
+            </div>
+            <div id="object-properties">
+              <p class="hint-text">Click an object in the scene to select it.</p>
+            </div>
+          </div>
+
+          <button id="clearSceneButton" class="danger-btn inspector-panel" data-inspector-panel="world"><i class="fas fa-trash"></i> Clear Scene</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== SCRIPT EDITOR TAB ========== -->
+    <div class="tab-content" id="script-tab">
+      <div class="script-editor-layout">
+
+        <!-- Script scope selector -->
+        <div class="script-scope-bar">
+          <div class="scope-tabs" id="scope-tabs">
+            <div class="scope-tab active" data-scope="global">
+              <i class="fas fa-globe"></i> Global
+            </div>
+            <!-- Scene scope tabs injected here -->
+          </div>
+          <div class="scope-info" id="scope-info">Global script runs across all scenes</div>
+        </div>
+
+        <div class="script-command-bar">
+          <div class="script-command-left">
+            <button type="button" class="logic-tool-btn" id="add-condition-tool"><i class="fas fa-filter"></i> Add Condition</button>
+            <button type="button" class="logic-tool-btn" id="add-action-tool"><i class="fas fa-bolt"></i> Add Action</button>
+            <button type="button" class="logic-tool-btn subtle" id="add-comment-tool"><i class="fas fa-comment-alt"></i> Comment</button>
+            <div class="script-stat"><span id="script-block-count">0</span> blocks</div>
+            <div class="script-stat muted" id="script-active-tool">Select / Erase</div>
+          </div>
+          <div class="script-search-wrap">
+            <i class="fas fa-search"></i>
+            <input id="block-search" type="search" placeholder="Search blocks">
+          </div>
+        </div>
+
+        <div class="grid-editor">
+          <div class="grid-container" tabindex="0">
+            <div class="grid" id="grid"></div>
+          </div>
+
+          <div class="side-panel">
+            <div id="block-type-panel" class="panel-section">
+              <h3>Block Type</h3>
+              <div class="block-selector">
+
+                <div class="block-category-label">Triggers</div>
+                <div class="block-option selected" data-block-type="none">
+                  <div class="block-color" style="background:#555;"></div>
+                  <div class="block-label">Select / Erase</div>
+                </div>
+                <div class="block-option" data-block-type="game-start">
+                  <div class="block-color" style="background:#10b981;"></div>
+                  <div class="block-label">On Game Start</div>
+                </div>
+                <div class="block-option" data-block-type="condition">
+                  <div class="block-color condition-color"></div>
+                  <div class="block-label">Keyboard</div>
+                </div>
+                <div class="block-option" data-block-type="mouse-condition">
+                  <div class="block-color" style="background:#0284c7;"></div>
+                  <div class="block-label">Mouse Click</div>
+                </div>
+                <div class="block-option" data-block-type="advanced-condition">
+                  <div class="block-color advanced-condition-color"></div>
+                  <div class="block-label">Collision</div>
+                </div>
+                <div class="block-option" data-block-type="overlap-condition">
+                  <div class="block-color" style="background:#f59e0b;"></div>
+                  <div class="block-label">Overlap / Touch</div>
+                </div>
+                <div class="block-option" data-block-type="get-variable">
+                  <div class="block-color" style="background:#06b6d4;"></div>
+                  <div class="block-label">Variable Check</div>
+                </div>
+                <div class="block-option" data-block-type="and-condition">
+                  <div class="block-color" style="background:#2dd4bf;"></div>
+                  <div class="block-label">AND / OR</div>
+                </div>
+                <div class="block-option" data-block-type="timer-condition">
+                  <div class="block-color" style="background:#14b8a6;"></div>
+                  <div class="block-label">On Timer</div>
+                </div>
+                <div class="block-option" data-block-type="edge-condition">
+                  <div class="block-color" style="background:#6366f1;"></div>
+                  <div class="block-label">On Screen Edge</div>
+                </div>
+
+                <div class="block-category-label">Actions</div>
+                <div class="block-option" data-block-type="action">
+                  <div class="block-color action-color"></div>
+                  <div class="block-label">Apply Force</div>
+                </div>
+                <div class="block-option" data-block-type="advanced-action">
+                  <div class="block-color advanced-action-color"></div>
+                  <div class="block-label">Teleport</div>
+                </div>
+                <div class="block-option" data-block-type="set-camera">
+                  <div class="block-color" style="background:#38bdf8;"></div>
+                  <div class="block-label">Set Camera</div>
+                </div>
+                <div class="block-option" data-block-type="follow-camera">
+                  <div class="block-color" style="background:#818cf8;"></div>
+                  <div class="block-label">Follow Camera</div>
+                </div>
+                <div class="block-option" data-block-type="set-size">
+                  <div class="block-color" style="background:#0f766e;"></div>
+                  <div class="block-label">Resize Object</div>
+                </div>
+                <div class="block-option" data-block-type="set-variable">
+                  <div class="block-color" style="background:#0ea5e9;"></div>
+                  <div class="block-label">Set Variable</div>
+                </div>
+                <div class="block-option" data-block-type="set-text">
+                  <div class="block-color" style="background:#a855f7;"></div>
+                  <div class="block-label">Set Text</div>
+                </div>
+                <div class="block-option" data-block-type="destroy-object">
+                  <div class="block-color" style="background:#dc2626;"></div>
+                  <div class="block-label">Destroy Object</div>
+                </div>
+                <div class="block-option" data-block-type="show-hide">
+                  <div class="block-color" style="background:#7c3aed;"></div>
+                  <div class="block-label">Show / Hide</div>
+                </div>
+                <div class="block-option" data-block-type="play-sound">
+                  <div class="block-color" style="background:#d97706;"></div>
+                  <div class="block-label">Play Sound</div>
+                </div>
+                <div class="block-option" data-block-type="switch-scene">
+                  <div class="block-color" style="background:#059669;"></div>
+                  <div class="block-label">Switch Scene</div>
+                </div>
+                <div class="block-option" data-block-type="set-velocity">
+                  <div class="block-color" style="background:#f43f5e;"></div>
+                  <div class="block-label">Set Velocity</div>
+                </div>
+                <div class="block-option" data-block-type="spawn-object">
+                  <div class="block-color" style="background:#22c55e;"></div>
+                  <div class="block-label">Spawn Clone</div>
+                </div>
+                <div class="block-option" data-block-type="rotate-object">
+                  <div class="block-color" style="background:#fb923c;"></div>
+                  <div class="block-label">Rotate</div>
+                </div>
+                <div class="block-option" data-block-type="random-variable">
+                  <div class="block-color" style="background:#c026d3;"></div>
+                  <div class="block-label">Random Variable</div>
+                </div>
+                <div class="block-option" data-block-type="force-toward">
+                  <div class="block-color" style="background:#e11d48;"></div>
+                  <div class="block-label">Force Toward</div>
+                </div>
+
+              </div>
+            </div>
+
+            <div id="properties-panel" class="panel-section" style="display:none;">
+              <h3>Properties</h3>
+              <div class="back-button" id="back-to-blocks-btn">
+                <i class="fas fa-arrow-left"></i> Back to Blocks
+              </div>
+              <div id="properties-content">
+                <p>Select a block to edit its properties</p>
+              </div>
+            </div>
+
+            <button id="clearButton" class="danger-btn"><i class="fas fa-trash"></i> Clear Grid</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PREVIEW TAB ========== -->
+    <div class="tab-content" id="preview-tab">
+      <div class="fullscreen-preview">
+        <canvas id="game-canvas"></canvas>
+        <div class="preview-controls">
+          <button id="preview-restart-btn" title="Restart"><i class="fas fa-redo"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="diagnostics-dock" id="diagnostics-dock">
+      <button type="button" class="diagnostics-header" id="diagnostics-toggle">
+        <span><i class="fas fa-stethoscope"></i> Diagnostics</span>
+        <strong id="diagnostic-count">0</strong>
+      </button>
+      <div class="diagnostics-feed" id="diagnostic-feed">
+        <div class="diagnostic-empty">No runtime diagnostics.</div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script src="block-catalog.js?v=20260517-rebuild1"></script>
+  <script src="hydra-universal.js?v=20260517-rebuild1"></script>
+  <script src="player-runtime.js?v=20260517-rebuild1"></script>
+  <script src="project.js?v=20260517-rebuild1"></script>
+  <script src="script.js?v=20260517-rebuild1"></script>
+</body>
+</html>
