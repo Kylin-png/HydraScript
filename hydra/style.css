@@ -1,0 +1,2358 @@
+/* ============================================================
+   HydraScript v3 — style.css
+   ============================================================ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #1f232c;
+  color: #e5e7eb;
+  overflow: hidden;
+  height: 100vh;
+  --primary-color:            #8762c5;
+  --secondary-color:          #c05454;
+  --advanced-condition-color: #997fd3;
+  --advanced-action-color:    #c09040;
+  --and-condition-color:      #369374;
+  --bg-white:   #24242e;
+  --bg-light:   #2c2d38;
+  --bg-lighter: #343541;
+  --bg-dark:    #1d1e27;
+  --bg-darker:  #181922;
+  --border-color:    #454653;
+  --text-primary:    #f3f4f6;
+  --text-secondary:  #c7c9d1;
+  --text-light:      #9ca3af;
+  /* F1 design tokens: spacing + type scale used by polish components */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px;
+  --space-4: 16px; --space-5: 20px; --space-6: 24px;
+  --font-xs: 11px; --font-sm: 12px; --font-md: 13px; --font-lg: 15px;
+  --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px;
+  --focus-ring: 0 0 0 2px rgba(78, 123, 196, 0.55);
+}
+
+/* ============================================================
+   LOADING SCREEN
+   ============================================================ */
+.loading-screen {
+  position: fixed; inset: 0;
+  background: #0f172a;
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999;
+  opacity: 1; transition: opacity 0.4s ease-out;
+}
+.loading-screen.hidden { opacity: 0; pointer-events: none; }
+.loading-content { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+.loading-logo { display: flex; align-items: center; gap: 14px; }
+.loading-logo-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; border-radius: 14px;
+  background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%);
+  color: #ffffff; font-size: 26px;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.5);
+}
+.loading-logo-text { font-size: 30px; font-weight: 900; color: #f1f5f9; letter-spacing: 0.12em; text-transform: uppercase; }
+.loading-status-container { text-align: center; width: 300px; }
+.loading-text { font-size: 16px; font-weight: 600; color: #e2e8f0; margin-bottom: 14px; }
+.loading-progress-bg { background: #1e293b; border-radius: 8px; height: 6px; overflow: hidden; }
+.loading-progress-fill { height: 100%; background: #4e7bc4; border-radius: 8px; width: 0; transition: width 0.4s ease; }
+.loading-subtext { font-size: 13px; color: #64748b; margin-top: 10px; }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; height: 48px;
+  background: #171820;
+  border-bottom: 1px solid #2f303a;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 14px;
+  z-index: 1100;
+}
+.logo { display: flex; align-items: center; gap: 11px; }
+.logo-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 8px;
+  background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%);
+  color: #ffffff; font-size: 15px;
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.45);
+  flex-shrink: 0;
+}
+img.logo-icon, img.loading-logo-icon { object-fit: cover; display: block; }
+.logo h1 {
+  font-size: 16px; font-weight: 900; color: #ffffff;
+  letter-spacing: 0.16em; text-transform: uppercase; margin: 0;
+}
+.project-controls { display: flex; align-items: center; gap: 16px; }
+.project-info { display: flex; align-items: center; gap: 8px; }
+.project-label {
+  font-size: 10px; font-weight: 800; color: #64748b;
+  letter-spacing: 0.9px; text-transform: uppercase;
+}
+#project-name {
+  font-size: 13px; font-weight: 800; color: #e3ebf6;
+  outline: none; border-radius: 6px; padding: 4px 8px;
+  cursor: text; min-width: 100px;
+  border: 1px solid #334155; background: #111827;
+  transition: all 0.15s;
+}
+#project-name:focus { border-color: #4e7bc4; color: #f1f5f9; background: #1e293b; }
+.project-actions { display: flex; gap: 8px; }
+.project-actions button {
+  background: transparent; color: #94a3b8; border: 1px solid #334155;
+  border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 500;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: all 0.15s; width: auto; margin: 0; box-shadow: none;
+}
+.project-actions button:hover { background: #1e293b; color: #e2e8f0; border-color: #475569; transform: none; }
+.project-actions button#save-project-btn { background: #4e7bc4; color: white; border-color: #4e7bc4; }
+.project-actions button#save-project-btn:hover { background: #5274be; }
+.project-actions button#export-playable-btn { background: #369374; color: #ecfdf5; border-color: #369374; }
+.project-actions button#export-playable-btn:hover { background: #26755d; }
+
+/* P3 item 15: new-project dialog (editor JSON import/export + templates) */
+.new-project-panel { max-width: 520px; }
+.new-project-form { display: flex; flex-direction: column; gap: 8px; }
+.new-project-form label { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-top: 6px; }
+.new-project-form input[type="text"], .new-project-form select {
+  background: #111827; border: 1px solid #334155; border-radius: 8px; color: #f1f5f9;
+  padding: 9px 12px; font-size: 14px; width: 100%; box-sizing: border-box;
+}
+.new-project-form input[type="text"]:focus, .new-project-form select:focus { border-color: #4e7bc4; outline: none; }
+.new-project-desc { color: #94a3b8; font-size: 13px; margin: 0; min-height: 1.4em; }
+.new-project-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+.new-project-actions button {
+  border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer;
+  background: transparent; color: #94a3b8; border: 1px solid #334155;
+}
+.new-project-actions button:hover { color: #f1f5f9; border-color: #64748b; }
+.new-project-actions button#new-project-create-btn { background: #4e7bc4; color: #fff; border-color: #4e7bc4; }
+.new-project-actions button#new-project-create-btn:hover { background: #5274be; }
+
+/* ============================================================
+   TABS
+   ============================================================ */
+.tabs {
+  position: fixed; top: 48px; left: 0; right: 0; height: 44px;
+  background: #1f2028;
+  display: flex; border-bottom: 1px solid #334155;
+  z-index: 1000;
+}
+.tab {
+  flex: 0 0 auto;
+  padding: 0 18px; height: 44px; line-height: 44px;
+  cursor: pointer; transition: all 0.15s;
+  font-weight: 500; font-size: 12px;
+  color: #c8cad3;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  border-right: 1px solid #343541;
+  position: relative;
+}
+.tab i { font-size: 12px; }
+.tab:hover { background: #2b2c36; color: #ffffff; }
+.tab.active { color: #ffffff; background: #2c2d38; }
+.tab.active::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: #997fd3;
+}
+
+/* ============================================================
+   CONTENT AREA
+   ============================================================ */
+.content-area {
+  position: fixed;
+  top: 92px; left: 0; right: 0; bottom: 28px;
+  display: flex;
+  overflow: hidden;
+}
+.tab-content { display: none; width: 100%; height: 100%; min-height: 0; flex: 1; }
+.tab-content.active { display: flex; }
+
+/* ============================================================
+   STATUS BAR (P5-2 slice a: object count, FPS, error count)
+   ============================================================ */
+.status-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 28px;
+  background: #171820;
+  border-top: 1px solid #2f303a;
+  display: flex; align-items: center; gap: 18px;
+  padding: 0 12px;
+  font-size: 12px; color: #94a3b8;
+  z-index: 1200;
+  overflow: hidden;
+}
+.status-item {
+  display: inline-flex; align-items: center; gap: 6px;
+  white-space: nowrap; min-width: 0; flex-shrink: 0;
+}
+.status-item i { font-size: 11px; color: #64748b; }
+.status-item strong { color: #e2e8f0; font-weight: 600; }
+#status-scene-name {
+  max-width: 220px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.status-spacer { flex: 1 1 auto; }
+/* The global button rule sets width: 100% + a purple background, so the
+   diagnostics button must reset all of it (width, margin, shadow, hover
+   lift) or it stretches across the bar and squeezes the scene name. */
+.status-diagnostics {
+  background: none; border: 0; cursor: pointer;
+  font: inherit; color: inherit;
+  padding: 3px 6px; border-radius: 6px;
+  width: auto; margin: 0; flex: 0 0 auto; box-shadow: none;
+}
+.status-diagnostics:hover { background: #1e293b; color: #e2e8f0; transform: none; box-shadow: none; }
+.status-diagnostics.has-errors strong { color: #cbaa54; }
+.status-diagnostics.has-errors i { color: #cbaa54; }
+
+/* ============================================================
+   SCENE EDITOR
+   ============================================================ */
+.scene-editor { position: relative; width: 100%; height: 100%; overflow: hidden; --scene-panel-width: 340px; }
+
+.scene-container {
+  position: absolute; inset: 44px var(--scene-panel-width) 0 0;
+  padding-top: 14px;
+  overflow: auto; outline: none;
+  background: #242832;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.16) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-position: 0 0;
+  background-size: 28px 28px, 112px 112px;
+  display: flex; justify-content: center; align-items: flex-start;
+  scrollbar-width: thin; scrollbar-color: #555765 #1f2028;
+}
+.scene-container::-webkit-scrollbar { width: 8px; height: 8px; }
+.scene-container::-webkit-scrollbar-track { background: #1f2028; }
+.scene-container::-webkit-scrollbar-thumb { background: #555765; border-radius: 4px; }
+
+.scene {
+  position: relative; overflow: hidden;
+  min-width: 100px; min-height: 100px;
+  transform-origin: center center;
+  box-shadow: 0 0 0 1px #71727d, 0 12px 34px rgba(0,0,0,0.34);
+}
+
+.scene-camera-frame {
+  position: absolute;
+  z-index: 999;
+  pointer-events: none;
+  border: 2px solid rgba(78, 123, 196, 0.95);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.85), 0 0 0 9999px rgba(15,23,42,0.08);
+}
+
+
+.scene-toolbar {
+  position: fixed; top: 92px; left: 0; right: var(--scene-panel-width); z-index: 90;
+  display: flex; align-items: center; gap: 6px;
+  min-height: 44px; padding: 6px 14px;
+  background: #20212a;
+  border: 0; border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: blur(10px);
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: thin;
+}
+.scene-switcher { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 0 0 auto; }
+.scene-switcher select {
+  height: 30px; width: 112px; max-width: 34vw;
+  border: 1px solid #334155; border-radius: 6px;
+  background: #0f172a; color: #e3ebf6;
+  font-size: 12px; font-weight: 700; padding: 0 8px;
+}
+.scene-tool-btn {
+  width: 30px; height: 30px; flex: 0 0 30px; padding: 0; margin: 0;
+  border-radius: 6px; color: #cbd5e1;
+  background: transparent; border: 1px solid transparent;
+  box-shadow: none; font-size: 12px;
+}
+.scene-tool-btn:hover { background: #1e293b; color: #f8fafc; transform: none; box-shadow: none; }
+.scene-tool-btn.active { background: #4762ae; color: #fff; border-color: #4e7bc4; }
+.scene-tool-btn.danger:hover { background: #b34f4f; border-color: #c05454; }
+.scene-tool-btn:disabled { opacity: 0.38; cursor: not-allowed; pointer-events: none; }
+.scene-tool-divider { width: 1px; height: 22px; flex: 0 0 1px; background: rgba(148, 163, 184, 0.28); margin: 0 2px; }
+/* P4 item 3D1 batch 2: Layout / 3D view segmented toggle in the scene toolbar
+   (visible only for 3D scenes). */
+.scene-view-toggle {
+  display: flex; align-items: center; gap: 0; flex: 0 0 auto;
+  background: #14161d; border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 8px; padding: 2px;
+}
+.scene-view-btn {
+  border: 0; background: transparent; color: #94a3b8;
+  font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 6px;
+  cursor: pointer; white-space: nowrap;
+}
+.scene-view-btn:hover { color: #e2e8f0; }
+.scene-view-btn.active { background: #3f92b8; color: #fff; }
+.scene-view-btn i { margin-right: 5px; }
+/* P4 item 3D1 batch 2: the in-editor 3D viewport canvas fills the stage;
+   object divs and the 2D camera frame hide while the 3D view is active. */
+#scene-3d-canvas {
+  position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+  z-index: 5; display: block;
+}
+.scene-3d-hint {
+  position: absolute; left: 10px; top: 10px; z-index: 6;
+  max-width: min(460px, 90%);
+  background: rgba(15, 23, 42, 0.82); color: #e2e8f0;
+  border: 1px solid rgba(63, 146, 184, 0.45); border-radius: 8px;
+  font-size: 11.5px; line-height: 1.5; padding: 7px 11px;
+  pointer-events: none;
+}
+.scene-3d-view .game-object, .scene-3d-view .scene-camera-frame { display: none !important; }
+.scene-zoom-readout {
+  min-width: 42px; text-align: center;
+  font-size: 11px; font-weight: 700; color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.scene-side-panel {
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: var(--scene-panel-width);
+  background: var(--bg-white);
+  border-left: 1px solid var(--border-color);
+  overflow-y: auto; padding: 8px;
+  /* F1 polish: room for the floating diagnostics pill at the bottom */
+  padding-bottom: 76px;
+  z-index: 100;
+  scrollbar-width: thin; scrollbar-color: var(--bg-darker) var(--bg-white);
+}
+.scene-side-panel::-webkit-scrollbar { width: 6px; }
+.scene-side-panel::-webkit-scrollbar-thumb { background: var(--bg-darker); border-radius: 3px; }
+.scene-side-panel .panel-section { padding: 8px; }
+.scene-side-panel .hint-text { margin-top: 6px; font-size: 11px; }
+.scene-side-panel .property-input { padding: 6px 8px; min-height: 30px; }
+.scene-side-panel button { min-height: 30px; }
+.inspector-tabs {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px;
+  position: sticky; top: 0; z-index: 5;
+  padding-bottom: 6px; margin-bottom: 6px;
+  background: var(--bg-white);
+}
+.inspector-tab {
+  width: 100%; min-width: 0; min-height: 30px; margin: 0; padding: 3px 4px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  border: 1px solid var(--border-color); border-radius: 4px;
+  background: var(--bg-light); color: var(--text-light);
+  box-shadow: none; font-size: 10px; font-weight: 800;
+}
+.inspector-tab i { font-size: 11px; }
+.inspector-tab span { overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.inspector-tab:hover { transform: none; background: #383947; color: #ffffff; box-shadow: none; }
+.inspector-tab.active { background: #6f6ac1; color: white; border-color: #8762c5; }
+.inspector-panel { display: none; }
+.inspector-panel.active { display: block; }
+
+/* ============================================================
+   RESIZABLE PANELS (P5-2 slice d)
+   A 6px drag handle on each side panel's left edge. The scene
+   handle is absolutely positioned over the seam (the panel and the
+   stage are absolutely positioned, so the handle rides the CSS var);
+   the logic handle is a flex item between the grid and the panel.
+   The visible grip is a short 2px bar in the middle; hover and drag
+   light it in the muted shell blue. The handle is a keyboard
+   control too (role="separator" in the markup), so it gets a focus
+   ring. Below the 900px breakpoint the panels dock below their main
+   area and the handles hide (see the responsive block).
+   ============================================================ */
+.panel-resizer {
+  position: relative;
+  flex: 0 0 6px;
+  width: 6px;
+  cursor: ew-resize;
+  touch-action: none;
+  background: transparent;
+  z-index: 101;
+}
+.panel-resizer::after {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  width: 2px; height: 48px;
+  transform: translate(-50%, -50%);
+  border-radius: 2px;
+  background: rgba(148, 163, 184, 0.35);
+}
+.panel-resizer:hover::after,
+.panel-resizer:active::after { background: #4e7bc4; }
+.panel-resizer:hover,
+.panel-resizer:active { background: rgba(78, 123, 196, 0.12); }
+.panel-resizer:focus-visible {
+  outline: 2px solid #4e7bc4;
+  outline-offset: -2px;
+}
+#scene-panel-resizer {
+  position: absolute;
+  top: 0; bottom: 0;
+  right: calc(var(--scene-panel-width) - 3px);
+  left: auto;
+  width: 6px;
+  flex: none;
+}
+/* The logic handle is a flex item: negative margins pull it over the
+   seam so it straddles the panel edge exactly like the scene handle —
+   its center is the panel edge, so a drag maps 1:1 to the new width. */
+#logic-panel-resizer {
+  margin-left: -3px;
+  margin-right: -3px;
+}
+
+/* ============================================================
+   DOCKABLE PANELS (P5-8 slice a)
+   Each side panel can dock to the left edge instead of the right:
+   script.js sets data-panel-side="left" on the tab container and
+   the panel, the stage, the toolbar, and the resize handle all move
+   with it. The panel width still comes from the same CSS variable
+   the resizer writes, so a docked-left panel keeps its width and
+   keeps resizing. The Logic tab is a flex row, so the left dock is
+   a flex-order flip (panel first, handle second, grid last). The
+   dock button reads active while its panel sits on the left.
+   Below the 900px breakpoint the panels dock below their main area
+   (see the responsive block), so these rules are re-asserted there.
+   ============================================================ */
+.scene-editor[data-panel-side="left"] .scene-container { inset: 44px 0 0 var(--scene-panel-width); }
+.scene-editor[data-panel-side="left"] .scene-toolbar { left: var(--scene-panel-width); right: 0; }
+.scene-editor[data-panel-side="left"] .scene-side-panel {
+  left: 0; right: auto;
+  border-left: none; border-right: 1px solid var(--border-color);
+}
+.scene-editor[data-panel-side="left"] #scene-panel-resizer {
+  left: calc(var(--scene-panel-width) - 3px); right: auto;
+}
+.grid-editor[data-panel-side="left"] .grid-container { order: 2; }
+.grid-editor[data-panel-side="left"] #logic-panel-resizer { order: 1; }
+.grid-editor[data-panel-side="left"] .side-panel {
+  order: 0;
+  border-left: none; border-right: 1px solid #1e293b;
+}
+.logic-tool-btn.active { background: #4762ae; border-color: #4e7bc4; }
+
+/* ============================================================
+   PANEL SECTIONS
+   ============================================================ */
+.panel-section {
+  margin-bottom: 8px;
+  background: var(--bg-light);
+  border-radius: 5px; padding: 8px;
+  border: 1px solid var(--border-color);
+}
+.panel-section h3 {
+  font-size: 11px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.7px; color: var(--text-light);
+  padding-bottom: 6px; margin-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+}
+.panel-section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 6px; margin-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+}
+.panel-section-header h3 { border: none; padding: 0; margin: 0; }
+.panel-count {
+  min-width: 22px; height: 20px; padding: 0 7px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; background: #e7eef8; color: #5274be;
+  font-size: 11px; font-weight: 800;
+}
+
+.prop-group { margin-bottom: 6px; }
+.prop-group label {
+  display: block; margin-bottom: 4px;
+  font-size: 11px; font-weight: 600; color: var(--text-secondary);
+}
+.key-picker-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: center; }
+.small-action-btn {
+  width: auto; min-height: 30px; margin: 0; padding: 0 10px;
+  border: 1px solid #334155; border-radius: 6px;
+  background: #1e293b; color: #e2e8f0;
+  font-size: 12px; font-weight: 800; box-shadow: none;
+}
+.small-action-btn:hover { transform: none; background: #5274be; border-color: #4e7bc4; }
+.prop-note {
+  font-size: 11px; color: var(--text-light);
+  background: var(--bg-dark); border-radius: 4px;
+  padding: 6px 8px; margin-top: 8px; line-height: 1.5;
+}
+.prop-divider { border: none; border-top: 1px solid var(--border-color); margin: 10px 0; }
+
+.hint-text { font-size: 11px; color: var(--text-light); line-height: 1.5; }
+
+.add-object-row { display: flex; gap: 6px; align-items: center; }
+.add-object-row select { flex: 1; }
+.add-object-row button { width: auto; margin: 0; padding: 6px 10px; flex-shrink: 0; }
+.object-create-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.object-create-btn {
+  width: 100%; margin: 0; padding: 7px 10px;
+  background: #111827; color: #e5edf8;
+  border: 1px solid #334155; box-shadow: none;
+}
+.object-create-btn:hover { background: #1e293b; transform: none; }
+
+/* ============================================================
+   PROPERTY INPUTS
+   ============================================================ */
+.property-group { margin-bottom: 8px; }
+.property-group label {
+  display: block; margin-bottom: 5px;
+  font-weight: 800; color: var(--text-secondary); font-size: 11px;
+}
+.property-input {
+  width: 100%; padding: 6px 8px;
+  background: #333440; border: 1px solid #575967;
+  border-radius: 4px; color: var(--text-primary);
+  font-size: 12px; transition: all 0.15s;
+}
+.property-input:focus { border-color: #b3a4e1; outline: none; box-shadow: 0 0 0 2px rgba(135,98,197,0.22); }
+.property-input:hover { border-color: #767887; }
+textarea.property-input { min-height: 88px; resize: vertical; line-height: 1.4; }
+input[type="color"].property-input { padding: 3px; height: 36px; cursor: pointer; }
+select.property-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #cbd5e1 50%), linear-gradient(135deg, #cbd5e1 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 30px;
+}
+.advanced-prop-details {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-light);
+  padding: 8px 10px;
+}
+.advanced-prop-details summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+.advanced-prop-details .property-group { margin-top: 8px; margin-bottom: 0; }
+
+.checkbox-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-secondary);
+  cursor: pointer; padding: 4px 0; margin-bottom: 6px;
+}
+.checkbox-row input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; accent-color: var(--primary-color); }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+button {
+  background: var(--primary-color); color: white; border: none;
+  padding: 7px 12px; border-radius: 7px; cursor: pointer;
+  width: 100%; margin-top: 10px; font-weight: 500; font-size: 12px;
+  transition: all 0.15s; box-shadow: 0 1px 3px rgba(78,123,196,0.3);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+button:hover { background: #5274be; transform: translateY(-1px); box-shadow: 0 3px 8px rgba(78,123,196,0.35); }
+button:active { transform: none; box-shadow: none; }
+
+.danger-btn {
+  background: var(--secondary-color) !important;
+  box-shadow: 0 1px 3px rgba(192,84,84,0.3) !important;
+}
+.danger-btn:hover { background: #b34f4f !important; box-shadow: 0 3px 8px rgba(192,84,84,0.35) !important; }
+
+.icon-btn {
+  width: auto; margin: 0;
+  padding: 6px 12px; font-size: 12px;
+}
+
+.upload-btn {
+  width: 100%; margin: 0; padding: 6px 10px;
+  background: #475569; font-size: 12px;
+  box-shadow: none;
+}
+.upload-btn:hover { background: #334155; transform: none; }
+
+.clear-btn {
+  width: 100%; margin-top: 6px; padding: 5px 10px;
+  background: #c05454; font-size: 11px;
+  box-shadow: none;
+}
+.clear-btn:hover { background: #b34f4f; transform: none; }
+
+.back-button {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg-light); border: 1px solid var(--border-color);
+  border-radius: 5px; padding: 6px 10px; margin-bottom: 10px;
+  cursor: pointer; font-size: 12px; color: var(--text-secondary);
+  transition: all 0.15s;
+}
+.back-button:hover { background: var(--bg-dark); color: var(--text-primary); }
+
+/* ============================================================
+   SCENE LIST
+   ============================================================ */
+.scene-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.scene-list-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 8px; border-radius: 6px;
+  background: var(--bg-white); border: 1px solid var(--border-color);
+  cursor: pointer; font-size: 12px; font-weight: 500; color: var(--text-primary);
+  transition: all 0.12s;
+}
+.scene-list-item:hover { background: var(--bg-light); }
+.scene-list-item.active { border-color: var(--primary-color); color: var(--primary-color); }
+.scene-list-item button {
+  width: 20px; height: 20px; min-width: 20px;
+  padding: 0; margin: 0; font-size: 10px;
+  border-radius: 4px; background: #c05454;
+  box-shadow: none; flex-shrink: 0;
+}
+.scene-list-item button:hover { background: #b34f4f; transform: none; }
+
+.scene-object-list { display: flex; flex-direction: column; gap: 4px; }
+.scene-object-list:focus-visible { outline: 2px solid #4e7bc4; outline-offset: 1px; border-radius: 7px; }
+/* P5-8 slice b: collapsible layer-group header — a full-width button
+   with a chevron and a "Layer N · M objects" label. */
+.object-list-group {
+  display: flex; align-items: center; gap: 6px; width: 100%;
+  padding: 5px 8px; border: 1px solid transparent; border-radius: 7px;
+  background: #f2f4fb; color: var(--text-primary);
+  font-size: 11px; font-weight: 800; text-align: left; cursor: pointer;
+}
+.object-list-group:hover { background: #e8ecf7; }
+.object-list-group i { font-size: 9px; color: var(--text-light); width: 12px; text-align: center; }
+.object-list-group-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.object-list-empty {
+  padding: 10px; color: var(--text-light); font-size: 12px;
+  border: 1px dashed var(--border-color); border-radius: 7px;
+  background: var(--bg-white);
+}
+.object-list-item {
+  display: grid; grid-template-columns: 24px minmax(0, 1fr) auto auto auto; gap: 8px;
+  align-items: center; padding: 6px 8px;
+  border: 1px solid var(--border-color); border-radius: 7px;
+  background: var(--bg-white); cursor: pointer; transition: all 0.12s;
+}
+.object-list-item:hover { border-color: #cbd5e1; background: #f8fafc; }
+.object-list-item.active { border-color: #4e7bc4; box-shadow: 0 0 0 1px rgba(78,123,196,0.22); }
+/* P5-8 slice b: a hidden row dims its swatch and text (never the
+   eye / lock buttons — the way back must stay readable). */
+.object-list-item.is-hidden .object-list-swatch,
+.object-list-item.is-hidden .object-list-name,
+.object-list-item.is-hidden .object-list-meta { opacity: 0.45; }
+/* P5-8 slice b: the eye / lock buttons — small icon buttons that
+   never stretch the row (the global button rule is width: 100%). */
+.object-list-eye, .object-list-lock {
+  width: 20px; height: 20px; min-width: 20px; padding: 0; margin: 0;
+  border: none; border-radius: 4px; background: transparent;
+  color: var(--text-light); font-size: 11px; line-height: 1;
+  box-shadow: none; flex-shrink: 0; cursor: pointer;
+}
+.object-list-eye:hover, .object-list-lock:hover { background: #eef2f9; color: var(--text-primary); transform: none; }
+.object-list-eye .fa-eye-slash { color: #c09040; }
+.object-list-lock .fa-lock { color: #4e7bc4; }
+/* P5-8 slice b: the inline rename input — same size as the name it
+   replaces, so the row never jumps while editing. */
+.object-list-rename {
+  width: 100%; min-width: 0; padding: 1px 4px;
+  border: 1px solid #4e7bc4; border-radius: 4px;
+  color: var(--text-primary); font-size: 12px; font-weight: 700;
+  background: #fff; outline: none; box-sizing: border-box;
+}
+.object-list-swatch {
+  width: 22px; height: 22px; border-radius: 5px;
+  border: 1px solid rgba(15,23,42,0.14); background-size: cover; background-position: center;
+}
+.object-list-name {
+  min-width: 0; color: var(--text-primary); font-size: 12px; font-weight: 700;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.object-list-meta {
+  display: block; margin-top: 2px;
+  color: var(--text-light); font-size: 10px; font-weight: 600;
+}
+.object-list-layer {
+  padding: 2px 6px; border-radius: 999px;
+  background: #f2f4fb; color: #6f6ac1;
+  font-size: 10px; font-weight: 800;
+}
+
+/* ============================================================
+   GAME OBJECTS IN SCENE EDITOR
+   ============================================================ */
+.game-object {
+  position: absolute; cursor: move; user-select: none;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  transition: box-shadow 0.12s;
+  background-size: cover; background-position: center;
+}
+.game-object:hover { box-shadow: 0 0 0 2px rgba(78,123,196,0.4); }
+.game-object.selected { box-shadow: 0 0 0 2px #4e7bc4, 0 0 10px rgba(78,123,196,0.35) !important; z-index: 100 !important; }
+/* P5-8 slice b: the outliner's eye leaves the canvas (the row still
+   selects it), and a locked object reads as locked where you work
+   on it — a dashed outline, under the selection ring when selected. */
+.game-object.object-hidden { display: none; }
+.game-object.object-locked { outline: 1px dashed #4e7bc4; outline-offset: -1px; }
+/* P5-8 slice b: the Inspector's details summary — kind, layer, id
+   on one muted line above the Name field. */
+.object-details-summary {
+  margin-bottom: 8px; color: var(--text-light);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+}
+.hitbox-overlay {
+  position: absolute;
+  pointer-events: none;
+  border: 1px dashed rgba(192,84,84,0.9);
+  background: rgba(192,84,84,0.08);
+  display: none;
+  box-sizing: border-box;
+}
+.game-object.selected .hitbox-overlay,
+.game-object.has-custom-hitbox .hitbox-overlay { display: block; }
+
+.sprite-object { background-color: #4488ff; }
+.text-object {
+  background: transparent !important;
+  border: 0 !important;
+  outline: 1px dashed rgba(78,123,196,0.35);
+  color: inherit;
+  display: block;
+  padding: 0;
+  white-space: nowrap;
+  overflow: visible;
+  line-height: normal;
+  border-radius: 0 !important;
+}
+
+/* Asset preview thumbnail */
+.upload-section { display: flex; flex-direction: column; gap: 6px; }
+.asset-preview {
+  width: 100%; max-height: 80px; object-fit: contain;
+  border-radius: 6px; border: 1px solid var(--border-color);
+  background: var(--bg-dark);
+}
+
+.physics-panel {
+  margin-top: 8px; padding: 8px; background: var(--bg-dark);
+  border-radius: 6px; border: 1px solid var(--border-color);
+}
+.hitbox-editor {
+  margin: 10px 0;
+  padding: 8px;
+  background: rgba(192,84,84,0.06);
+  border: 1px dashed rgba(192,84,84,0.35);
+  border-radius: 6px;
+}
+.property-mini-title {
+  margin-bottom: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #c05454;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+/* F2: Menus & HUD inspector section + scene-editor widget badges */
+.ui-layout-editor {
+  margin: 10px 0;
+  padding: 8px;
+  background: rgba(78,123,196,0.06);
+  border: 1px dashed rgba(78,123,196,0.35);
+  border-radius: 6px;
+}
+.ui-layout-editor .property-mini-title { color: #4e7bc4; }
+.ui-widget-badge {
+  position: absolute;
+  top: -9px;
+  right: -4px;
+  z-index: 5;
+  padding: 1px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #e3ebf6;
+  background: #4762ae;
+  border-radius: 999px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   SCRIPT EDITOR
+   ============================================================ */
+.script-editor-layout { display: flex; flex-direction: column; width: 100%; height: 100%; background: #eef2f7; }
+
+/* Scope bar — selects global vs scene script */
+.script-scope-bar {
+  display: flex; align-items: center; gap: 0;
+  background: #111827; border-bottom: 1px solid #1f2937;
+  padding: 0 16px; height: 40px; flex-shrink: 0;
+}
+.scope-tabs { display: flex; gap: 0; height: 100%; }
+.scope-tab {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 14px; height: 100%; cursor: pointer;
+  font-size: 12px; font-weight: 500; color: #64748b;
+  border-right: 1px solid #334155;
+  transition: all 0.12s;
+}
+.scope-tab i { font-size: 11px; }
+.scope-tab:hover { background: #273447; color: #94a3b8; }
+.scope-tab.active { color: #4e7bc4; background: #1e3a5f; border-bottom: 2px solid #4e7bc4; }
+.scope-info {
+  margin-left: auto; font-size: 11px; color: #94a3b8; font-style: italic;
+}
+
+.script-command-bar {
+  height: 44px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 0 16px;
+  background: #0b1120;
+  border-bottom: 1px solid #1e293b;
+}
+.script-command-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.logic-tool-btn {
+  width: auto;
+  height: 30px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid #6b5e9d;
+  border-radius: 5px;
+  background: #6f6ac1;
+  color: #ffffff;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 900;
+}
+.logic-tool-btn:hover { background: #7469d1; transform: none; box-shadow: none; }
+.logic-tool-btn.subtle {
+  background: #2c2d38;
+  border-color: #555765;
+  color: #d4d4dc;
+}
+.logic-tool-btn.subtle:hover { background: #383947; }
+.script-stat {
+  height: 26px; padding: 0 10px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #172554; color: #cdddf0;
+  font-size: 12px; font-weight: 800;
+}
+.script-stat.muted { background: #111827; color: #94a3b8; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.script-search-wrap {
+  width: min(260px, 38vw); height: 30px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 10px; border: 1px solid #334155; border-radius: 7px;
+  background: #0f172a; color: #64748b;
+}
+.script-search-wrap input {
+  width: 100%; border: none; outline: none; background: transparent;
+  color: #e5edf8; font-size: 12px; font-weight: 600;
+}
+.script-search-wrap input::placeholder { color: #64748b; }
+.block-option.is-filtered { display: none; }
+
+/* Grid editor layout */
+.grid-editor { display: flex; flex: 1; overflow: hidden; min-width: 0; background: #05070c; --logic-panel-width: 320px; }
+
+.grid-container {
+  flex: 1 1 auto; min-width: 0; height: 100%; overflow: auto; outline: none;
+  background: #242832;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.055) 1px, transparent 1px);
+  background-position: 0 0;
+  background-size: 56px 56px;
+  scrollbar-width: thin; scrollbar-color: #555765 #1f2028;
+}
+.grid-container::-webkit-scrollbar { width: 8px; height: 8px; }
+.grid-container::-webkit-scrollbar-track { background: #1f2028; }
+.grid-container::-webkit-scrollbar-thumb { background: #555765; border-radius: 4px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(60, 56px);
+  grid-template-rows: repeat(60, 56px);
+  gap: 0;
+  background: transparent;
+  padding: 0; border-radius: 0;
+  margin: 0;
+  box-shadow: none;
+  border: none;
+}
+
+/* Cells */
+.cell {
+  width: 56px; height: 56px;
+  background: transparent;
+  border-radius: 0; position: relative; z-index: 1;
+  border: none;
+  cursor: pointer; transition: background 0.1s, transform 0.1s, box-shadow 0.1s, filter 0.1s;
+}
+.cell:hover { background: rgba(255,255,255,0.12); transform: none; z-index: 2; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55); }
+.cell.selected {
+  z-index: 10 !important;
+  outline: 2px solid #c6ad49;
+  outline-offset: -2px;
+  box-shadow: 0 0 0 2px rgba(15,23,42,0.9), 0 0 16px rgba(198,173,73,0.55) !important;
+}
+.cell.selected:hover { background: var(--block-color, rgba(255,255,255,0.12)); }
+
+/* Block type cells */
+.cell::after {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  color: rgba(255,255,255,0.96); font-weight: 800; font-size: 10px;
+  letter-spacing: 0.2px; width: 42px; text-align: center; padding: 0 3px;
+  pointer-events: none; z-index: 3;
+  text-shadow: 0 1px 2px rgba(15,23,42,0.45);
+}
+
+.cell[data-block-type] {
+  background: var(--block-color, #64748b);
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+
+.cell[data-block-label]::after {
+  content: attr(data-block-label);
+  font-size: 9px;
+}
+
+/* Compact block density (P5-8 slice c): when the Logic tab's
+   "Compact blocks" toggle is on, the .grid-editor carries
+   data-block-density="compact" and the grid cells shrink from 56px
+   to 44px, so about a quarter more columns fit across the same
+   stage. The background grid lines, the cell size, and the block
+   labels all move together from this one attribute. The label rules
+   below are more specific than the per-type ::after font sizes
+   (e.g. .cell.action::after at 10px), so every label shrinks to
+   8px in compact mode. The puzzle-piece SVG blocks need no rule
+   here: their shape is inset: 0 in the cell, so it scales with it.
+   Cell size is purely visual — the grid is still 60 columns wide
+   with unbounded rows, and no block or chain changes meaning. */
+.grid-editor[data-block-density="compact"] .grid-container {
+  background-size: 44px 44px;
+}
+.grid-editor[data-block-density="compact"] .grid {
+  grid-template-columns: repeat(60, 44px);
+  grid-template-rows: repeat(60, 44px);
+}
+.grid-editor[data-block-density="compact"] .cell {
+  width: 44px; height: 44px;
+}
+.grid-editor[data-block-density="compact"] .cell::after {
+  font-size: 8px;
+  width: 34px;
+}
+.grid-editor[data-block-density="compact"] .cell[data-block-label]::after {
+  font-size: 8px;
+}
+
+/* Concept-image blocks (Nov 4, 2026): the injected SVG is
+   the whole visual, so the cell itself goes transparent and the ::after label
+   is hidden (the SVG carries its own label). Tabs overflow into neighboring cells. */
+.cell.puzzle-block {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+.cell.puzzle-block:hover { background: rgba(255,255,255,0.10); }
+.cell.puzzle-block .puzzle-shape {
+  position: absolute; inset: 0;
+  /* The SVG carries fixed width="56" height="56" attributes, so
+     without a CSS size it would stay 56px in a 44px compact cell
+     and spill 12px over the cell's right edge. 100% makes the shape
+     fill its cell at either density (identical at 56px) while the
+     viewBox scales the drawing and overflow: visible still lets
+     the connector tabs paint past the cell edge. */
+  width: 100%; height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.cell.puzzle-block[data-block-label]::after { display: none; }
+
+.cell.condition,
+.cell.mouse-condition,
+.cell.action,
+.cell.advanced-condition,
+.cell.advanced-action,
+.cell.and-condition,
+.cell.set-variable,
+.cell.get-variable,
+.cell.destroy-object,
+.cell.show-hide,
+.cell.play-sound,
+.cell.game-start,
+.cell.switch-scene,
+.cell.set-text,
+.cell.set-camera,
+.cell.follow-camera,
+.cell.set-size,
+.cell.timer-condition,
+.cell.edge-condition,
+.cell.trigger-once-condition,
+.cell.set-velocity,
+.cell.spawn-object,
+.cell.rotate-object,
+.cell.random-variable,
+.cell.overlap-condition,
+.cell.force-toward {
+  --block-color: #64748b;
+  background: var(--block-color);
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+
+/* Option 3 prototype fix (Nov 4, 2026): the type rules above paint a
+   rectangular colored background + inset ring on every placed cell. They
+   come after .cell.puzzle-block with equal specificity, so they win, and
+   the SVG silhouette's chamfers and recesses fill back in with the block
+   color: blocks read as squares and seams read as overlapping squares.
+   This later, equal-specificity rule restores true transparency for SVG
+   blocks. Hover (0,3,0) and .selected (!important ring) still win over it. */
+.cell.puzzle-block {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.cell.condition::before,
+.cell.mouse-condition::before,
+.cell.advanced-condition::before,
+.cell.and-condition::before,
+.cell.get-variable::before,
+.cell.game-start::before,
+.cell.timer-condition::before,
+.cell.edge-condition::before,
+.cell.trigger-once-condition::before,
+.cell.action::before,
+.cell.advanced-action::before,
+.cell.set-variable::before,
+.cell.destroy-object::before,
+.cell.show-hide::before,
+.cell.play-sound::before,
+.cell.switch-scene::before,
+.cell.set-text::before,
+.cell.set-camera::before,
+.cell.follow-camera::before,
+.cell.set-size::before,
+.cell.set-velocity::before,
+.cell.spawn-object::before,
+.cell.rotate-object::before,
+.cell.random-variable::before,
+.cell.overlap-condition::before,
+.cell.force-toward::before {
+  content: none;
+}
+.cell.condition::after   { content: "Input"; }
+
+.cell.condition              { --block-color: #3b82f6; }
+
+.cell.mouse-condition        { --block-color: #0284c7; }
+.cell.mouse-condition::after { content: "Mouse"; font-size: 10px; }
+
+.cell.action             { --block-color: #ef4444; }
+.cell.action::after      { content: "Force"; font-size: 10px; }
+
+.cell.advanced-condition         { --block-color: #8b5cf6; }
+.cell.advanced-condition::after  { content: "Collide"; font-size: 9px; }
+
+.cell.advanced-action        { --block-color: #f59e0b; }
+.cell.advanced-action::after { content: "Tele"; font-size: 11px; }
+
+.cell.and-condition        { --block-color: #10b981; }
+.cell.and-condition::after { content: "AND"; }
+
+.cell.set-variable         { --block-color: #0ea5e9; }
+.cell.set-variable::after  { content: "Set Var"; font-size: 9px; }
+
+.cell.get-variable         { --block-color: #06b6d4; }
+.cell.get-variable::after  { content: "Var?"; font-size: 11px; }
+
+.cell.destroy-object         { --block-color: #dc2626; }
+.cell.destroy-object::after  { content: "Destroy"; font-size: 9px; }
+
+.cell.show-hide        { --block-color: #7c3aed; }
+.cell.show-hide::after { content: "Vis"; font-size: 11px; }
+
+.cell.play-sound        { --block-color: #d97706; }
+.cell.play-sound::after { content: "Sound"; font-size: 10px; }
+
+.cell.game-start        { --block-color: #10b981; }
+.cell.game-start::after { content: "Start"; font-size: 10px; }
+
+.cell.switch-scene        { --block-color: #059669; }
+.cell.switch-scene::after { content: "Scene"; font-size: 10px; }
+
+.cell.set-text        { --block-color: #a855f7; }
+.cell.set-text::after { content: "Set Text"; font-size: 9px; }
+
+.cell.set-camera        { --block-color: #38bdf8; }
+.cell.set-camera::after { content: "Camera"; font-size: 9px; }
+
+.cell.follow-camera        { --block-color: #818cf8; }
+.cell.follow-camera::after { content: "Follow"; font-size: 10px; }
+
+.cell.set-size        { --block-color: #0f766e; }
+.cell.set-size::after { content: "Size"; font-size: 10px; }
+
+.cell.timer-condition        { --block-color: #14b8a6; }
+.cell.timer-condition::after { content: "Timer"; font-size: 10px; }
+
+.cell.edge-condition         { --block-color: #6366f1; }
+.cell.edge-condition::after  { content: "On Edge"; font-size: 9px; }
+
+.cell.trigger-once-condition         { --block-color: #10b981; }
+.cell.trigger-once-condition::after  { content: "Once"; font-size: 10px; }
+
+.cell.set-velocity           { --block-color: #f43f5e; }
+.cell.set-velocity::after    { content: "Velocity"; font-size: 9px; }
+
+.cell.spawn-object           { --block-color: #22c55e; }
+.cell.spawn-object::after    { content: "Spawn"; font-size: 10px; }
+
+.cell.rotate-object          { --block-color: #fb923c; }
+.cell.rotate-object::after   { content: "Rotate"; font-size: 10px; }
+
+.cell.random-variable        { --block-color: #c026d3; }
+.cell.random-variable::after { content: "Random"; font-size: 9px; }
+
+.cell.overlap-condition        { --block-color: #f59e0b; }
+.cell.overlap-condition::after { content: "Touch"; font-size: 10px; }
+
+.cell.force-toward        { --block-color: #e11d48; }
+.cell.force-toward::after { content: "Toward"; font-size: 9px; }
+
+.cell.triggered { box-shadow: 0 0 10px rgba(203,170,84,0.5), inset 0 0 6px rgba(203,170,84,0.2) !important; }
+
+/* P4 item 36 phase C (flow tracer): cells that fired in the last 30
+   frames get a cyan ring on the grid, so the flow is visible at a glance
+   while the Trace panel lists the exact firing order. */
+.cell.traced { outline: 2px solid rgba(80,177,192,0.9) !important; outline-offset: -2px; }
+
+/* Hover glow on all colored cells */
+.cell[data-block-type]:hover,
+.cell.condition:hover,
+.cell.mouse-condition:hover,
+.cell.action:hover,
+.cell.advanced-condition:hover,
+.cell.advanced-action:hover,
+.cell.and-condition:hover,
+.cell.set-variable:hover,
+.cell.get-variable:hover,
+.cell.destroy-object:hover,
+.cell.show-hide:hover,
+.cell.play-sound:hover,
+.cell.game-start:hover,
+.cell.switch-scene:hover,
+.cell.set-text:hover,
+.cell.set-camera:hover,
+.cell.follow-camera:hover,
+.cell.set-size:hover,
+.cell.timer-condition:hover,
+.cell.edge-condition:hover,
+.cell.trigger-once-condition:hover,
+.cell.set-velocity:hover,
+.cell.spawn-object:hover,
+.cell.rotate-object:hover,
+.cell.random-variable:hover,
+.cell.overlap-condition:hover,
+.cell.force-toward:hover {
+  transform: none;
+  filter: brightness(1.15);
+  z-index: 2;
+}
+
+/* ============================================================
+   SCRIPT SIDE PANEL
+   ============================================================ */
+.side-panel {
+  width: var(--logic-panel-width); min-width: var(--logic-panel-width); background: #0b1120;
+  border-left: 1px solid #1e293b;
+  padding: 12px; overflow-y: auto; height: 100%; flex-shrink: 0;
+  /* F1 polish: room for the floating diagnostics pill at the bottom */
+  padding-bottom: 76px;
+  scrollbar-width: thin; scrollbar-color: #334155 #0b1120;
+}
+.side-panel::-webkit-scrollbar { width: 6px; }
+.side-panel::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+.side-panel .panel-section {
+  background: #111827;
+  border-color: #1f2937;
+}
+.side-panel .panel-section h3,
+.side-panel .panel-section-header h3 { color: #94a3b8; border-color: #1f2937; }
+.side-panel .hint-text,
+.side-panel .prop-note { color: #94a3b8; }
+.side-panel .property-group label { color: #cbd5e1; }
+
+.block-selector { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+.block-category-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: #64748b; padding: 6px 4px 2px;
+  border-top: 1px solid #1f2937; margin-top: 4px;
+}
+.block-category-label:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+.block-option {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 9px; border-radius: 8px;
+  background: #0f172a; cursor: pointer;
+  transition: all 0.12s; border: 1px solid #1e293b;
+  box-shadow: none;
+}
+.block-option:hover { background: #172033; transform: translateY(-1px); border-color: #334155; }
+.block-option.selected { border-color: var(--primary-color); box-shadow: 0 0 0 1px rgba(78,123,196,0.45), 0 8px 18px rgba(82,116,190,0.18); }
+.block-color { width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0; }
+.block-label { font-size: 12px; font-weight: 600; color: #e5edf8; }
+
+.condition-color          { background: #3b82f6; }
+.action-color             { background: #ef4444; }
+.advanced-condition-color { background: #8b5cf6; }
+.advanced-action-color    { background: #f59e0b; }
+
+/* ============================================================
+   PREVIEW
+   ============================================================ */
+.fullscreen-preview {
+  width: 100%; height: 100%; flex: 1; min-width: 0; min-height: 0;
+  display: flex; justify-content: center; align-items: center;
+  position: relative; overflow: hidden;
+  background: #020617;
+}
+#game-canvas {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  image-rendering: auto;
+  box-shadow: none;
+  background: #000;
+}
+.preview-controls {
+  position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 2;
+}
+.preview-controls button {
+  width: 36px; height: 36px; padding: 0; margin: 0; border-radius: 8px;
+  background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+  color: white; font-size: 14px; box-shadow: none;
+}
+.preview-controls button:hover { background: rgba(255,255,255,0.15); transform: none; }
+.preview-controls select {
+  height: 36px; border-radius: 8px; padding: 0 6px;
+  background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+  color: white; font-size: 13px;
+}
+/* P3 item 23 (preview upgrades): device frames for playtesting. The frame
+   is display-only chrome around the canvas: the game still renders at the
+   scene viewport resolution, and the canvas is letterboxed inside the
+   device at one uniform scale — it keeps the scene's aspect ratio and
+   never stretches to the device's shape (scaled down only if the preview
+   pane is smaller than the device). */
+.preview-device-frame {
+  display: flex; flex-direction: column; align-items: center;
+  max-width: 100%; max-height: 100%;
+}
+.preview-device-frame .preview-device-label {
+  color: #94a3b8; font-size: 12px; margin-bottom: 8px;
+}
+.preview-device-frame[data-device="phone-portrait"],
+.preview-device-frame[data-device="phone-landscape"] {
+  padding: 12px; border: 2px solid #334155; border-radius: 28px; background: #0f172a;
+}
+.preview-device-frame[data-device="tablet-portrait"] {
+  padding: 12px; border: 2px solid #334155; border-radius: 16px; background: #0f172a;
+}
+/* P4 item 34 (profiling overlay): the Profiler toggle lights up while the
+   overlay is visible, so the playtester can see the state at a glance. */
+.preview-controls button.active { background: rgba(203,170,84,0.35); border-color: rgba(203,170,84,0.6); }
+
+/* P4 item 36 phase C (flow tracer): the live event feed overlaid on the
+   preview canvas, bottom-left so it never covers the toolbar buttons. */
+.trace-panel[hidden] { display: none; }
+.trace-panel {
+  position: absolute; left: 12px; bottom: 12px; z-index: 2;
+  width: 340px; max-width: calc(100% - 24px); max-height: 45%;
+  display: flex; flex-direction: column;
+  background: rgba(2,6,23,0.85); border: 1px solid rgba(80,177,192,0.4);
+  border-radius: 8px; color: #e2f3ff; font-size: 11px; overflow: hidden;
+}
+.trace-panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.12);
+  font-weight: 600;
+}
+.trace-panel-header button {
+  width: auto; height: auto; padding: 2px 8px; font-size: 11px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px; color: white;
+}
+.trace-feed { overflow-y: auto; padding: 6px 10px; font-family: ui-monospace, monospace; line-height: 1.5; }
+
+/* ============================================================
+   TUTORIAL PANEL (P3 item 21: guided first-run tutorial)
+   ============================================================ */
+.tutorial-panel[hidden] { display: none; }
+.tutorial-panel {
+  margin: 12px 12px 0; padding: 12px 16px;
+  background: #f3f6fb; border: 1px solid #abc6e5; border-radius: 8px;
+  color: #1e3a5f; font-size: 12px;
+}
+.tutorial-panel-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+.tutorial-panel-steps { margin: 0 0 10px 20px; padding: 0; line-height: 1.6; }
+.tutorial-panel-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.tutorial-panel-actions button {
+  width: auto; height: auto; padding: 6px 12px; font-size: 12px;
+  background: #5274be; border: none; border-radius: 6px; color: white; cursor: pointer;
+}
+.tutorial-panel-actions button:last-child { background: transparent; color: #1e3a5f; border: 1px solid #abc6e5; }
+.trace-feed .trace-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trace-feed .trace-empty { color: #94a3b8; font-family: inherit; }
+
+/* ============================================================
+   SAVE TOAST
+   ============================================================ */
+.save-confirmation {
+  position: fixed; bottom: 24px; right: 24px;
+  background: #369374; color: white;
+  padding: 10px 18px; border-radius: 8px;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 14px rgba(54,147,116,0.4);
+  z-index: 9999; opacity: 0; transform: translateY(10px);
+  transition: all 0.25s ease; font-weight: 500; font-size: 14px;
+}
+.save-confirmation.show { opacity: 1; transform: translateY(0); }
+
+/* ============================================================
+   EXPRESSION INPUTS (GDevelop-style)
+   ============================================================ */
+.expr-input-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.expr-input {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace !important;
+  font-size: 12px !important;
+  letter-spacing: 0.3px;
+  padding-right: 28px !important;
+}
+.expr-input.has-expr {
+  border-color: #4e7bc4 !important;
+  background: #f3f6fb !important;
+  color: #3f518e !important;
+}
+.expr-badge {
+  position: absolute;
+  right: 8px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px; font-weight: 700;
+  font-family: monospace;
+  color: #94a3b8;
+  pointer-events: none;
+  letter-spacing: 0.5px;
+  background: transparent;
+}
+.expr-badge.active { color: #4e7bc4; }
+.expr-suggestions {
+  display: none;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  margin-top: 3px;
+  max-height: 90px;
+  overflow-y: auto;
+  z-index: 200;
+  scrollbar-width: thin; scrollbar-color: #334155 #1e293b;
+}
+.expr-input-wrap:focus-within .expr-suggestions { display: flex; }
+.expr-pill {
+  font-size: 11px; font-family: 'SF Mono', monospace;
+  padding: 2px 8px; border-radius: 10px;
+  cursor: pointer; border: none;
+  transition: filter 0.1s; white-space: nowrap;
+  line-height: 1.6;
+}
+.expr-pill:hover { filter: brightness(1.3); }
+.expr-pill.var-pill   { background: #1e3a5f; color: #abc6e5; }
+.expr-pill.prop-pill  { background: #18221b; color: #9ed7b3; }
+.expr-pill.math-pill  { background: #2b2236; color: #d8c5ed; }
+
+/* ============================================================
+   UNIVERSAL CREATOR LAYER
+   ============================================================ */
+.hierarchy-search-wrap,
+.script-search-wrap {
+  position: relative;
+}
+.hierarchy-search-wrap {
+  margin: 8px 0 10px;
+}
+.hierarchy-search-wrap i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 12px;
+}
+.hierarchy-search-wrap input {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px 0 30px;
+  border: 1px solid #334155;
+  border-radius: 7px;
+  background: #111827;
+  color: #e5edf8;
+  outline: none;
+}
+
+.component-section {
+  margin-top: 12px;
+  border-top: 1px solid #1f2937;
+  padding-top: 12px;
+}
+.component-section-header,
+.component-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.component-section-header h4 {
+  color: #e5edf8;
+  font-size: 12px;
+  font-weight: 900;
+}
+.component-card {
+  margin-top: 8px;
+  background: #111827;
+  border: 1px solid #273244;
+  border-radius: 7px;
+  overflow: hidden;
+}
+.component-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #172033;
+  color: #e5edf8;
+  cursor: pointer;
+}
+.component-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 900;
+  font-size: 12px;
+}
+.component-state {
+  min-width: 28px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  font-size: 9px;
+  line-height: 1.35;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid transparent;
+}
+.component-state.is-on {
+  color: #bbf7d0;
+  border-color: rgba(71, 160, 104, 0.45);
+  background: rgba(71, 160, 104, 0.16);
+}
+.component-state.is-off {
+  color: #f2d6d6;
+  border-color: rgba(218, 143, 143, 0.45);
+  background: rgba(150, 63, 63, 0.16);
+}
+.component-category {
+  color: #94a3b8;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.component-card-body {
+  padding: 7px 8px;
+}
+.component-prop {
+  display: grid;
+  grid-template-columns: 1fr minmax(80px, 1.1fr);
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 7px;
+  color: #cbd5e1;
+  font-size: 12px;
+}
+.component-prop input,
+.component-prop select {
+  min-width: 0;
+  height: 28px;
+  border: 1px solid #334155;
+  border-radius: 5px;
+  padding: 0 7px;
+  background: #0f172a;
+  color: #e5edf8;
+}
+.component-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.component-mini-btn {
+  width: auto;
+  height: 26px;
+  margin: 0;
+  padding: 0 8px;
+  border-radius: 5px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #cbd5e1;
+  font-size: 11px;
+  box-shadow: none;
+  cursor: pointer;
+}
+.component-mini-btn.danger {
+  border-color: #7f1d1d;
+  color: #f2d6d6;
+}
+
+/* P4 Advanced batch 34 (object tags): the Inspector Tags chips — a
+   pill per tag with a small ×, plus the add row under them. */
+.tags-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 2px 0 6px;
+}
+.tags-empty {
+  color: #94a3b8;
+  font-size: 11px;
+}
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 8px;
+  margin: 2px 4px 2px 0;
+  border-radius: 999px;
+  background: #164e63;
+  color: #a5f3fc;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.tag-chip-x {
+  width: auto;
+  height: 16px;
+  margin: 0;
+  padding: 0 4px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #a5f3fc;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none;
+}
+.tag-chip-x:hover {
+  background: #0e7490;
+  color: #ffffff;
+}
+.tags-add-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.tags-add-row .property-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.hydra-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 6, 23, 0.72);
+  z-index: 4000;
+}
+.hydra-modal {
+  width: min(1280px, calc(100vw - 48px));
+  max-height: min(760px, calc(100vh - 48px));
+  display: flex;
+  flex-direction: column;
+  background: #23242e;
+  border: 1px solid #494b58;
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+  overflow: hidden;
+}
+.hydra-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  color: #f8fafc;
+  border-bottom: 1px solid #334155;
+}
+.hydra-modal-body {
+  padding: 0;
+  overflow: auto;
+}
+.picker-layout {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.8fr) minmax(320px, 1.25fr) minmax(260px, 0.95fr);
+  min-height: 520px;
+}
+.picker-context,
+.picker-main,
+.picker-details {
+  min-width: 0;
+  padding: 14px;
+}
+.picker-context,
+.picker-main {
+  border-right: 1px solid #494b58;
+}
+.picker-search {
+  width: 100%;
+  height: 38px;
+  margin-bottom: 12px;
+  border: 1px solid #475569;
+  border-radius: 7px;
+  padding: 0 11px;
+  background: #111827;
+  color: #f8fafc;
+}
+.picker-context-search {
+  width: 100%;
+  height: 38px;
+  margin-bottom: 12px;
+  border: 1px solid #575967;
+  border-radius: 5px;
+  padding: 0 11px;
+  background: #333440;
+  color: #f8fafc;
+}
+.picker-context-title,
+.picker-category,
+.picker-detail-category {
+  color: #a3a6b2;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.picker-object-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.picker-object {
+  width: 100%;
+  justify-content: flex-start;
+  margin: 0;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: #3b3d4a;
+  color: #f3f4f6;
+  box-shadow: none;
+}
+.picker-object:hover { background: #474958; border-color: #6b6e7d; transform: none; box-shadow: none; }
+.picker-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.picker-category { margin: 10px 0 4px; }
+.picker-item {
+  min-height: 42px;
+  text-align: left;
+  width: 100%;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 8px 10px;
+  background: transparent;
+  color: #e5edf8;
+  box-shadow: none;
+  cursor: pointer;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+}
+.picker-item:hover,
+.picker-item:focus { border-color: #696b78; background: #4a4b57; transform: none; }
+.picker-item strong { display: block; font-size: 13px; margin-bottom: 5px; }
+.picker-item span { display: block; color: #94a3b8; font-size: 11px; line-height: 1.35; }
+.picker-details {
+  color: #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.picker-detail-icon {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: #343541;
+  color: #b3a4e1;
+}
+.picker-details p {
+  color: #d4d6df;
+  line-height: 1.45;
+  font-size: 13px;
+}
+.picker-details ul {
+  margin-left: 18px;
+  color: #b8bbc7;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.picker-empty {
+  padding: 10px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.diagnostics-dock {
+  position: fixed;
+  right: 14px;
+  bottom: 42px;
+  width: 330px;
+  max-width: calc(100vw - 28px);
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 9px;
+  overflow: hidden;
+  z-index: 1500;
+  box-shadow: 0 18px 50px rgba(2,6,23,0.35);
+}
+.diagnostics-header {
+  width: 100%;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  border-bottom: 1px solid #273244;
+  border-radius: 0;
+  padding: 0 10px;
+  background: #172033;
+  color: #e5edf8;
+  box-shadow: none;
+  cursor: pointer;
+}
+.diagnostics-header strong {
+  min-width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #5274be;
+  color: #fff;
+  font-size: 12px;
+}
+.diagnostics-feed {
+  max-height: 170px;
+  overflow: auto;
+  padding: 8px;
+}
+.diagnostics-dock.is-collapsed .diagnostics-feed { display: none; }
+/* F1 polish: collapsed dock becomes a compact pill (icon + count) instead
+   of a 330px-wide bar, so it never covers the panel buttons beneath it. */
+.diagnostics-dock.is-collapsed { width: auto; border-radius: 999px; }
+.diagnostics-dock.is-collapsed .diagnostics-header {
+  width: auto; height: 44px; padding: 0 16px 0 12px;
+  border: 0; border-radius: 999px; gap: 8px; justify-content: center;
+}
+.diagnostics-dock.is-collapsed .diagnostics-header > span { font-size: 0; }
+.diagnostics-dock.is-collapsed .diagnostics-header > span i { font-size: 15px; }
+.diagnostic-empty,
+.diagnostic-row {
+  padding: 7px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+.diagnostic-row {
+  margin-bottom: 6px;
+  background: #0f172a;
+  color: #e5edf8;
+  border-left: 3px solid #64748b;
+}
+.diagnostic-row.warning { border-left-color: #c09040; }
+.diagnostic-row.error { border-left-color: #c05454; }
+.diagnostic-row.info { border-left-color: #63accd; }
+
+/* ========== Asset Manager ========== */
+.asset-storage-summary {
+  font-size: 11px;
+  color: var(--text-light);
+  margin: 6px 0 8px;
+}
+.asset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+/* Input actions (P4 item 29 — Inputs tab) */
+.input-action-row {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #fff;
+}
+.input-action-top {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+/* Cutscene step rows (P4 Advanced batch 11): a step can carry up to
+   five fields after its kind select, so the row wraps instead of
+   crushing every field to a sliver (the move step overflowed the
+   card and clipped its delete button). */
+.cutscene-step-row {
+  flex-wrap: wrap;
+}
+.cutscene-step-row .property-input {
+  flex: 1 1 90px;
+  min-width: 90px;
+  width: auto;
+}
+.cutscene-step-row select.property-input {
+  flex: 1 1 120px;
+  min-width: 120px;
+}
+.cutscene-step-row input[type="number"].property-input {
+  flex: 0 1 64px;
+  min-width: 64px;
+}
+/* High-score rows (P4 Advanced batch 12): board rows are plain text on
+   the shared white card, so they need dark text — the panel's light
+   text is unreadable on white. The config label also stays on one
+   line instead of wrapping to two in its narrow column. */
+.highscore-row {
+  color: #1e293b;
+}
+.highscore-row .hint-text {
+  color: #64748b;
+}
+.highscore-row .input-action-label {
+  white-space: nowrap;
+  width: auto;
+}
+.highscore-row .highscore-name {
+  flex: 1;
+}
+.highscore-row .highscore-score {
+  font-weight: 600;
+}
+/* Variables rows (P5 core-engine track, item P5-1, slice b): one
+   card per variable — name, type badge, starting value, rename +
+   delete. The rows are plain text on the shared white card, so they
+   need dark text like the high-score rows. The live dot marks a
+   live-only row in the Preview tab's readout (a variable the blocks
+   made mid-run with no definition). */
+.var-row {
+  color: #1e293b;
+}
+.var-row .var-top {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.var-row .var-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 12px;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.var-row .var-name:hover { color: #6f6ac1; text-decoration: underline; }
+.var-row .var-type {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6f6ac1;
+  background: #f2f4fb;
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+/* The Functions row reuses the var-row layout, but its parameter badge
+   must keep the names exactly as typed (a, b) — the uppercase transform
+   above is for type names like NUMBER, and it would show (A, B) for
+   lowercase parameters, which are case-sensitive in expressions. */
+/* P5-3 slice b: an eight-parameter badge is too wide to share one
+   flex row with the name, the params input, Edit body, and delete —
+   the name (flex: 1, min-width: 0) used to shrink to nothing and
+   vanish (caught by the slice-b visual QA on sum8). Function rows
+   wrap, the name keeps a 48px floor so it can never vanish, and the
+   badge truncates with an ellipsis (its title carries the full
+   list). Short rows (add with two parameters) still fit on one line.
+   The selectors carry .var-row too: at equal specificity the later
+   .var-row rules would win over bare .fn-row rules. */
+.var-row.fn-row .var-top {
+  flex-wrap: wrap;
+}
+.var-row.fn-row .var-name {
+  min-width: 48px;
+}
+/* The params input is narrower on function rows (72px vs the
+   variables panel's 96px) so a short row like add(a, b) still fits
+   on one line with Edit body and delete; the input scrolls, so the
+   full comma-separated list stays editable. */
+.var-row.fn-row .var-value {
+  flex: 0 1 72px;
+  min-width: 56px;
+}
+.var-row.fn-row .fn-params {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.var-row .fn-params {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #6f6ac1;
+  background: #f2f4fb;
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+.var-row .var-value {
+  flex: 0 1 96px;
+  min-width: 64px;
+}
+.var-row .var-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #47a068;
+  flex-shrink: 0;
+}
+.var-row .var-object {
+  font-size: 11px;
+  color: #64748b;
+}
+.var-row .var-note {
+  font-size: 11px;
+  color: #64748b;
+  margin: 0;
+}
+.var-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin: 6px 0 0;
+}
+.var-add-error {
+  font-size: 12px;
+  color: #b34f4f;
+  margin: 0;
+}
+.var-add-error:empty { display: none; }
+
+/* Live variables readout in the Preview tab (P5-1 slice b): the
+   manager panel lives in the Scene tab, and switching tabs stops
+   the preview, so the live view sits here, next to the game. */
+.preview-variables { margin-top: 10px; background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; }
+.preview-variables-header { display: flex; justify-content: space-between; align-items: center; width: 100%; background: none; border: none; color: #e2e8f0; font-size: 12px; font-weight: 600; padding: 8px 12px; cursor: pointer; text-align: left; }
+.preview-variables-header strong { color: #94a3b8; font-weight: 600; }
+.preview-variables-body { padding: 0 12px 10px; }
+.preview-variables-body .hint-text { color: #94a3b8; }
+.preview-var-row { margin-top: 6px; }
+.input-action-name { flex: 1; }
+.input-action-bindings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.input-action-field {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.input-action-label {
+  font-size: 11px;
+  color: var(--text-light);
+  width: 52px;
+  flex-shrink: 0;
+}
+.input-action-field .property-input { flex: 1; min-width: 0; }
+/* Audio bus rows (P4 item 30): volume slider + mute toggle per bus. */
+.audio-bus-row {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #fff;
+}
+.audio-bus-top {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.audio-bus-name { font-weight: 600; font-size: 12px; flex: 1; }
+.audio-bus-pct { font-size: 11px; color: var(--text-light); min-width: 44px; text-align: right; }
+.audio-bus-slider { width: 100%; accent-color: #aa7435; }
+.audio-bus-note { font-size: 11px; color: var(--text-light); margin: 0; }
+.input-action-keybtn {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.input-action-keybtn:hover { background: #f2f4fb; border-color: #abc6e5; }
+.asset-empty {
+  font-size: 12px;
+  color: var(--text-light);
+  text-align: center;
+  padding: 18px 10px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+}
+.asset-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+.asset-thumb {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 6px;
+  background: #e2e8f0;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 20px;
+  overflow: hidden;
+}
+.asset-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.asset-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.asset-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dark, #1e293b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.asset-sub {
+  font-size: 11px;
+  color: var(--text-light);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.asset-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #e3f5e9;
+  color: #285338;
+}
+.asset-badge.unused {
+  background: #f2ecd3;
+  color: #74472c;
+}
+.asset-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.asset-action-btn {
+  padding: 4px 9px;
+  font-size: 11px;
+  border-radius: 6px;
+  background: #e2e8f0;
+  color: #334155;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.asset-action-btn:hover { background: #cbd5e1; }
+.asset-action-btn.danger { background: #f8e8e8; color: #963f3f; }
+.asset-action-btn.danger:hover { background: #f2d6d6; }
+
+/* ========== Sprite animation editor (Animations section) ========== */
+.animation-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px; margin-bottom: 8px; }
+.animation-card-header { display: flex; gap: 6px; margin-bottom: 6px; }
+.animation-card-row { display: flex; gap: 8px; margin-bottom: 6px; }
+.animation-frames { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.animation-frame { position: relative; width: 56px; height: 56px; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; background: #f8fafc; }
+.animation-frame img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.animation-frame-missing { display: flex; align-items: center; justify-content: center; height: 100%; color: #963f3f; font-weight: 700; }
+.animation-frame-remove, .animation-frame-move { position: absolute; bottom: 1px; width: 16px; height: 16px; padding: 0; font-size: 10px; line-height: 16px; text-align: center; border: none; border-radius: 3px; background: rgba(15, 23, 42, 0.75); color: #fff; cursor: pointer; }
+.animation-frame-remove { right: 1px; }
+.animation-frame-move.move-left { left: 1px; }
+.animation-frame-move.move-right { left: 19px; }
+.animation-frame-move:disabled { opacity: 0.35; cursor: default; }
+.animation-preview-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.animation-preview-img { width: 56px; height: 56px; object-fit: contain; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; }
+
+/* ============================================================
+   F1 UI POLISH — shared components, focus visibility, empty states
+   ============================================================ */
+
+/* Visible keyboard focus everywhere in the editor */
+.hydra-editor-focus, .grid-container:focus-visible { outline: none; }
+button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Shared empty-state component: icon + title + text (+ optional action).
+   Use anywhere a list or canvas has nothing to show yet. */
+.hydra-empty {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+  padding: var(--space-5) var(--space-3);
+  text-align: center;
+  border: 1px dashed var(--border-color); border-radius: var(--radius-md);
+  background: var(--bg-white);
+}
+.hydra-empty .hydra-empty-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: var(--radius-lg);
+  background: #e7eef8; color: #4e7bc4; font-size: 18px;
+}
+.hydra-empty .hydra-empty-title { font-size: var(--font-md); font-weight: 800; color: var(--text-primary); }
+.hydra-empty .hydra-empty-text { font-size: var(--font-sm); color: var(--text-light); line-height: 1.5; max-width: 240px; }
+.hydra-empty .hydra-empty-action {
+  margin-top: var(--space-1); padding: 7px 14px;
+  border: 1px solid #4e7bc4; border-radius: var(--radius-sm);
+  background: #4e7bc4; color: #ffffff;
+  font-size: var(--font-sm); font-weight: 700; cursor: pointer;
+}
+.hydra-empty .hydra-empty-action:hover { background: #5274be; }
+
+/* Empty-logic hint bar: floats over the logic grid when the active scope
+   has no blocks yet. Points new users at the block picker. */
+.grid-container { position: relative; }
+.grid-empty-hint {
+  position: absolute; top: var(--space-3); left: 50%; transform: translateX(-50%);
+  z-index: 40; width: max-content; max-width: min(560px, calc(100% - 48px));
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: #1e293b; border: 1px solid #4e7bc4; border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+  color: #e2e8f0;
+}
+.grid-empty-hint > i { color: #cbaa54; font-size: 18px; flex-shrink: 0; }
+.grid-empty-hint .grid-empty-hint-copy { display: flex; flex-direction: column; gap: 2px; flex: 1 1 auto; min-width: 0; }
+.grid-empty-hint .grid-empty-hint-copy strong { font-size: var(--font-md); color: #ffffff; }
+.grid-empty-hint .grid-empty-hint-copy span { font-size: var(--font-sm); color: #94a3b8; line-height: 1.45; }
+.grid-empty-hint .grid-empty-hint-btn {
+  flex-shrink: 0; width: auto; margin-top: 0; padding: 8px 14px;
+  border: none; border-radius: var(--radius-sm);
+  background: #4e7bc4; color: #ffffff;
+  font-size: var(--font-sm); font-weight: 700; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.grid-empty-hint .grid-empty-hint-btn:hover { background: #5274be; }
+.grid-empty-hint .grid-empty-hint-close {
+  flex-shrink: 0; width: 26px; height: 26px; padding: 0;
+  border: none; border-radius: var(--radius-sm);
+  background: transparent; color: #64748b; cursor: pointer; font-size: 13px;
+}
+.grid-empty-hint .grid-empty-hint-close:hover { color: #e2e8f0; background: #334155; }
+
+/* Export button busy state (set by project.js while the playable HTML builds) */
+.project-actions button:disabled { opacity: 0.75; cursor: wait; }
+.project-actions button .fa-spin { margin-right: 2px; }
+
+/* P4 item 31: tilemap editor */
+.game-object.tilemap-object { background: transparent; cursor: crosshair; overflow: hidden; }
+.game-object.tilemap-object .tilemap-canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
+/* P4 item 3D1: 3D primitives show a live 3D thumbnail inside the div. */
+.game-object.object3d-object { background: transparent; overflow: hidden; }
+.game-object.object3d-object .object3d-canvas { display: block; width: 100%; height: 100%; pointer-events: none; }
+.object3d-badge {
+  position: absolute; top: 2px; left: 2px; z-index: 3;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
+  color: #e0f2fe; background: rgba(63, 146, 184, 0.85);
+  border-radius: 3px; padding: 1px 4px; pointer-events: none;
+}
+/* P4 item 3D5: lights show a bulb glyph with the light type in the scene
+   editor — they are invisible in the render. */
+.game-object.light3d-object { background: transparent; overflow: visible; cursor: move; }
+.game-object.light2d-object { background: transparent; overflow: visible; cursor: move; }
+.light2d-glyph {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 2px; font-size: 22px; pointer-events: none;
+}
+.light2d-type {
+  font-size: 10px; color: #e2e8f0; background: rgba(2, 6, 23, 0.55);
+  border-radius: 8px; padding: 1px 6px; pointer-events: none; white-space: nowrap;
+}
+.light3d-glyph {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 2px; font-size: 22px; pointer-events: none;
+}
+.light3d-type {
+  font-size: 10px; color: #e2e8f0; background: rgba(2, 6, 23, 0.55);
+  border-radius: 8px; padding: 1px 6px; pointer-events: none; white-space: nowrap;
+}
+.tilemap-editor { margin-top: 10px; }
+.tilemap-size-row { display: flex; gap: 12px; }
+.tilemap-size-row label { display: flex; align-items: center; gap: 6px; font-size: var(--font-sm); color: #94a3b8; }
+.tilemap-size-row .property-input { width: 70px; }
+.tilemap-strip-title { font-size: var(--font-xs); color: #94a3b8; margin: 8px 0 4px; }
+.tilemap-strip { display: block; max-width: 100%; border: 1px solid #334155; border-radius: var(--radius-sm); cursor: pointer; background: #0f172a; }
+.tilemap-brush-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.tilemap-brush-label { font-size: var(--font-sm); color: #e2e8f0; }
+.tilemap-solid-label { font-size: var(--font-sm); color: #cbaa54; margin: 8px 0 0; }
+.tilemap-ascii { font-family: ui-monospace, monospace; font-size: 12px; line-height: 1.5; width: 100%; }
+.tilemap-ascii-err { font-size: var(--font-xs); color: #da8f8f; margin: 4px 0 0; min-height: 1em; }
+
+/* P4 E1: export dialog (web targets) */
+.export-dialog-overlay { position: fixed; inset: 0; background: rgba(2,6,23,.74); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+.export-dialog-overlay.open { display: flex; }
+.export-dialog-panel { background: #0f172a; border: 1px solid #334155; border-radius: var(--radius-lg, 14px); max-width: 920px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 22px 24px; box-shadow: 0 24px 80px rgba(0,0,0,.55); }
+.export-dialog-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.export-dialog-header h2 { margin: 0; font-size: 20px; color: #f1f5f9; }
+.export-dialog-header h2 i { color: #c09040; margin-right: 8px; }
+.export-dialog-close { background: transparent; border: 1px solid #334155; color: #94a3b8; border-radius: 8px; width: 34px; height: 34px; cursor: pointer; font-size: 15px; }
+.export-dialog-close:hover { color: #f1f5f9; border-color: #64748b; }
+.export-dialog-intro { color: #94a3b8; font-size: 14px; margin: 0 0 16px; }
+.export-target-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+.export-card { border: 1px solid #334155; border-radius: 12px; padding: 16px; background: #111c33; display: flex; flex-direction: column; gap: 10px; }
+.export-card h3 { margin: 0; font-size: 16px; color: #f1f5f9; }
+.export-card h3 i { color: #c09040; margin-right: 6px; }
+.export-card-desc { margin: 0; font-size: 13px; color: #cbd5e1; line-height: 1.45; }
+.export-checklist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; color: #94a3b8; line-height: 1.45; }
+.export-checklist li { padding-left: 20px; position: relative; }
+.export-checklist li::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; position: absolute; left: 0; top: 2px; color: #58af8f; font-size: 11px; }
+.export-checklist strong { color: #e2e8f0; font-weight: 600; }
+.export-download-btn { margin-top: auto; background: #c09040; border: none; color: #0f172a; font-weight: 700; border-radius: 10px; padding: 10px 14px; cursor: pointer; font-size: 14px; }
+.export-download-btn:hover:not(:disabled) { background: #cbaa54; }
+.export-download-btn:disabled { opacity: 0.7; cursor: wait; }
+/* P4 E4: honest capability notes on each export hub card. */
+.export-capabilities { margin: 0; font-size: 12px; color: #9ac9df; line-height: 1.5; border-top: 1px solid #1e293b; padding-top: 8px; }
+.export-capabilities i { color: #63accd; margin-right: 5px; }
+/* P4 E4: one-click copy command chips inside the checklists. */
+.export-cmd { display: inline-flex; align-items: center; gap: 5px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; color: #cbaa54; background: #0f172a; border: 1px solid #475569; border-radius: 6px; padding: 2px 8px; cursor: pointer; vertical-align: baseline; }
+.export-cmd:hover { border-color: #c09040; background: #1e293b; }
+.export-cmd i { font-size: 10px; color: #94a3b8; }
+.export-cmd:hover i { color: #cbaa54; }
+.export-cmd.copied { color: #58af8f; border-color: #58af8f; }
+.export-cmd.copied i { color: #58af8f; }
+.export-cmd.copy-failed { color: #da8f8f; border-color: #da8f8f; }
+
+/* ============================================================
+   P3 ITEM 17 — ACCESSIBILITY: RESPONSIVE LAYOUT + REDUCED MOTION
+   ============================================================ */
+
+/* Narrow screens: stack the editor's side panels below the main area
+   instead of squeezing them beside it, so nothing needs horizontal scroll. */
+@media (max-width: 900px) {
+  /* Scene tab: the inspector docks below the stage. */
+  .scene-container { inset: 44px 0 42% 0; }
+  .scene-side-panel {
+    top: auto; left: 0; right: 0; bottom: 0;
+    width: auto; height: 42%;
+    border-left: none; border-top: 1px solid var(--border-color);
+  }
+  /* Logic tab: the properties panel docks below the grid. */
+  .grid-editor { flex-direction: column; }
+  .grid-editor .grid-container { flex: 1 1 auto; min-height: 0; height: auto; }
+  .grid-editor .side-panel {
+    width: 100%; min-width: 0; height: 42%; flex-shrink: 0;
+    border-left: none; border-top: 1px solid #1e293b;
+  }
+  /* Resizable panels are a wide-screen feature: below the breakpoint
+     the panels dock below their main area, so the handles hide. */
+  .panel-resizer { display: none; }
+  /* Dockable panels (P5-8 slice a): the left-dock rules above are
+     more specific than these stacked rules, so they are re-asserted
+     here — same selectors, later in the file — or a left-docked
+     panel would keep its side layout on a narrow screen. */
+  .scene-editor[data-panel-side="left"] .scene-container { inset: 44px 0 42% 0; }
+  .scene-editor[data-panel-side="left"] .scene-toolbar { left: 0; right: 0; }
+  .scene-editor[data-panel-side="left"] .scene-side-panel {
+    left: 0; right: 0; width: auto; border-right: none;
+  }
+  .grid-editor[data-panel-side="left"] .grid-container { order: 0; }
+  .grid-editor[data-panel-side="left"] #logic-panel-resizer { order: 0; }
+  .grid-editor[data-panel-side="left"] .side-panel {
+    order: 0; width: 100%; min-width: 0; border-right: none;
+  }
+  /* Block picker: one column instead of three. */
+  .picker-layout { grid-template-columns: 1fr; min-height: 0; }
+  .picker-context, .picker-main { border-right: none; border-bottom: 1px solid #494b58; }
+}
+
+/* Honor the OS reduced-motion setting: no transitions or animations. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
