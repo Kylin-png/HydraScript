@@ -1,0 +1,5 @@
+node_modules/
+.hydra-cycle.lock
+# Playtest harness screenshots: timestamped evidence dirs regenerated on
+# every harness run (tests/playtest-game.js); never committed.
+screenshots/playtest-*/
