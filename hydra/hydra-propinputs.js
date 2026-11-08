@@ -263,12 +263,24 @@ function hydraPropInputsFactory() {
   // value shows as (none) — or (No named objects yet) when the scene
   // has no objects — instead of borrowing the first object's name,
   // which used to make an unset field look like it was already set
-  // to that object. includeAll keeps its -- Any -- lead.
-  function makeObjectSelect(value, onChange, includeAll) {
+  // to that object. includeAll keeps its -- Any -- lead. allowBlank
+  // false removes the blank row entirely (blocks that need a target,
+  // like Apply Force) and, when the stored value is blank, picks the
+  // first object and saves it, so the block never sits on no target.
+  function makeObjectSelect(value, onChange, includeAll, allowBlank) {
     var names = safeNames(getObjectNames);
     var blank = includeAll ? '-- Any --' : (names.length ? '(none)' : '(No named objects yet)');
-    var opts = [['', blank]];
-    names.forEach(function (n) { opts.push([n, n]); });
+    var opts;
+    if (allowBlank === false && names.length) {
+      opts = names.map(function (n) { return [n, n]; });
+      if (names.indexOf(value) < 0) {
+        value = names[0];
+        try { if (typeof onChange === 'function') onChange(value); } catch (e) { /* never break the picker */ }
+      }
+    } else {
+      opts = [['', blank]];
+      names.forEach(function (n) { opts.push([n, n]); });
+    }
     return makeSelect(opts, value, onChange);
   }
 

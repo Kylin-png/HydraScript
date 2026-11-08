@@ -332,6 +332,10 @@ function hydraExecuteFactory() {
   // the safe default, never to a throw out of the module. ---
 
   function named(ctx, name, includeHidden) {
+    // A blank name matches nothing. Before this, a blank target
+    // matched every nameless object, so a block set to "(none)"
+    // silently moved the sprite it could not even list.
+    if (!name || (typeof name === 'string' && !name.trim())) return [];
     try {
       var r = ctx.named(name, !!includeHidden);
       return Array.isArray(r) ? r : [];
@@ -403,6 +407,11 @@ function hydraExecuteFactory() {
     } catch (e) { return null; }
   }
 
+  // One warning per block type per session: a block whose target is
+  // blank would otherwise spam the diagnostics panel every frame it
+  // runs, and the panel is where a targetless block must be visible.
+  var warnedBlankTarget = new Set();
+
   // --- Target resolution (the export's targets()/targetsByName()).
   // Context narrowing: a picked object (obj1/obj2 from the triggering
   // condition) wins when it matches the name; otherwise the first live
@@ -410,6 +419,13 @@ function hydraExecuteFactory() {
   // excluded unless includeHidden (the export's named() semantics). ---
 
   function targets(ctx, data, includeHidden) {
+    if (!data.targetObject || (typeof data.targetObject === 'string' && !data.targetObject.trim())) {
+      if (!warnedBlankTarget.has(data.type)) {
+        warnedBlankTarget.add(data.type);
+        warn(ctx, 'No target object is set for "' + (data.type || 'block') + '". Pick an object in the block properties, or the block does nothing.');
+      }
+      return [];
+    }
     var all = named(ctx, data.targetObject || '', includeHidden);
     if (!all.length) return [];
     if (data.targetMode === 'all') return all;
@@ -2214,7 +2230,27 @@ function hydraExecuteFactory() {
           }
           if (atOk) {
             var atDone = false;
-            try { atDone = AT.attach(ctx.attachments, atChild, atParent, atDx, atDy); } catch (e) { atDone = false; }
+            try {
+              // Follow rotation / scale come from the block's
+              // checkboxes. A block placed before batch 38 carries
+              // neither key, and stays position-only, the way it
+              // was authored; a new block defaults both on.
+              var atFollowR = data.followRotation === undefined ? false : data.followRotation === true;
+              var atFollowS = data.followScale === undefined ? false : data.followScale === true;
+              // Capture the transform baseline while both objects
+              // are live, so the follow measures from where they
+              // actually are. A link to an object that has not
+              // spawned yet captures lazily on its first apply
+              // frame instead.
+              var atCap = null;
+              var atKidL = named(ctx, atChild)[0] || null;
+              var atParL = named(ctx, atParent)[0] || null;
+              if (atKidL && atParL && AT.captureTransform) {
+                try { atCap = AT.captureTransform(atParL, atKidL); } catch (e) { atCap = null; }
+              }
+              atDone = AT.attach(ctx.attachments, atChild, atParent, atDx, atDy,
+                { followRotation: atFollowR, followScale: atFollowS, capture: atCap });
+            } catch (e) { atDone = false; }
             if (!atDone) warn(ctx, 'Attach Object To Object: attaching "' + atChild + '" to "' + atParent + '" would close a cycle. Nothing attached.');
           }
         }
@@ -2239,6 +2275,34 @@ function hydraExecuteFactory() {
             try { soDone = AT.setOffset(ctx.attachments, soName, soXi.value, soYi.value); } catch (e) { soDone = false; }
             if (!soDone) warn(ctx, 'Set Attachment Offset: "' + soName + '" is not attached to anything. Attach it first.');
           }
+        }
+      } else if (type === 'setAttachmentFollow') {
+        // P4 Advanced batch 38 (rotation + scale following): flip
+        // either follow box on a link that already stands, without
+        // moving the child. The capture is re-based to the live
+        // transforms, so the child stays exactly where it is and
+        // follows from there. A block placed before batch 38 cannot
+        // exist (the block is new), so a missing box reads as on,
+        // the block's own default.
+        var sfName = String(data.targetObject || '').trim();
+        if (!sfName) {
+          warn(ctx, 'Set Attachment Follow: the object is blank. Name the attached object.');
+        } else if (ctx.attachments) {
+          var sfR = data.followRotation === undefined ? true : data.followRotation === true;
+          var sfS = data.followScale === undefined ? true : data.followScale === true;
+          var sfCap = null;
+          var sfLink = null;
+          try { sfLink = AT.attachmentOf(ctx.attachments, sfName); } catch (e) { sfLink = null; }
+          if (sfLink) {
+            var sfKid = named(ctx, sfName)[0] || null;
+            var sfPar = named(ctx, sfLink.parent)[0] || null;
+            if (sfKid && sfPar && AT.captureTransform) {
+              try { sfCap = AT.captureTransform(sfPar, sfKid); } catch (e) { sfCap = null; }
+            }
+          }
+          var sfDone = false;
+          try { sfDone = AT.setFollow(ctx.attachments, sfName, sfR, sfS, sfCap); } catch (e) { sfDone = false; }
+          if (!sfDone) warn(ctx, 'Set Attachment Follow: "' + sfName + '" is not attached to anything. Attach it first.');
         }
       }
       return;

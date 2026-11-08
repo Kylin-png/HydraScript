@@ -64,7 +64,7 @@ check('factories are exposed on HydraUniversal',
   check('createObject sprite: 60x60 default', o.width === 60 && o.height === 60);
   check('createObject sprite: default color + physics',
     o.color === '#4488ff' && o.physics && o.physics.friction === 0.82 && o.physics.maxSpeed === 25);
-  check('createObject sprite: unnamed sprite keeps blank name', o.name === '');
+  check('createObject sprite: a new sprite is named Sprite, never blank', o.name === 'Sprite');
   check('createObject sprite: kind/archetype agree', o.kind === 'sprite' && o.archetype === 'sprite');
   check('createObject sprite: normalized with Transform component',
     !!o.components.find(c => c.type === 'Transform') &&

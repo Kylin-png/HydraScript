@@ -488,6 +488,16 @@
     ];
     scene.eventSheets = asArray(scene.eventSheets);
     scene.objects.forEach(obj => normalizeObject(obj));
+    // Same-name objects are a supported engine pattern, NOT a defect
+    // to repair: a game names every goblin 'goblin' and every coin
+    // 'coin', and objectCount, the tag picks, For Each Object and
+    // For Each Tagged Object all address the whole group by that one
+    // name. Renumbering duplicates on load (coin, coin 2, coin 3)
+    // silently breaks those games, so load never renames a
+    // non-blank name. A blank name is repaired to its kind default
+    // by normalizeObject above; two repaired blanks sharing a name
+    // are just another same-name group, and the editor's
+    // addGameObject still gives a fresh object a distinct name.
     scene.entities = scene.objects;
     if (project && project.logicGrids && typeof project.logicGrids === 'object') {
       project.logicGrids[String(scene.id)] = scene.gridData;
@@ -533,9 +543,37 @@
     return clone;
   }
 
+  // One mapping for the name a new object of a kind gets, used by
+  // createObject and by the load repair below, so the two can never
+  // drift apart and a nameless object can never be born. A blank name
+  // is invisible to every object picker (they list names only) yet
+  // still matches a blank target at runtime, so no kind may fall
+  // through to ''.
+  function defaultNameFor(kind) {
+    switch (kind) {
+      case 'empty': return 'Entity';
+      case 'button': return 'Button';
+      case 'panel': return 'Panel';
+      case 'tilemap': return 'Tilemap';
+      case 'camera3d': return 'Camera3D';
+      case 'light3d': case 'light2d': case 'light': return 'Light';
+      case 'box3d': return 'Box3D';
+      case 'sphere3d': return 'Sphere3D';
+      case 'plane3d': return 'Plane3D';
+      case 'cylinder3d': return 'Cylinder3D';
+      case 'model3d': return 'Model3D';
+      case 'text': return 'Text';
+      default: return 'Sprite';
+    }
+  }
+
   function normalizeObject(obj) {
     if (!obj || typeof obj !== 'object') return obj;
     obj.kind = obj.kind || 'sprite';
+    // A damaged or hand-made record with no name repairs to the
+    // default for its kind here, so a nameless object never survives
+    // load to reach a picker or a target lookup.
+    if (!obj.name || !String(obj.name).trim()) obj.name = defaultNameFor(obj.archetype || obj.kind);
     obj.tags = Array.isArray(obj.tags) ? obj.tags : [];
     // P4 Advanced batch 34 (object tags): per-object tag lists
     // (trimmed, deduped case-insensitively, at most 16). Defensive,
@@ -1261,12 +1299,7 @@
     if (k === 'model3d') { width = 120; height = 120; depth = 120; }
     const obj = Object.assign({
       id: nextFactoryId(),
-      name: k === 'empty' ? 'Entity' : k === 'button' ? 'Button' : k === 'panel' ? 'Panel' :
-        k === 'tilemap' ? 'Tilemap' : k === 'camera3d' ? 'Camera3D' :
-        k === 'light3d' || k === 'light2d' ? 'Light' :
-        is3d ? (k === 'box3d' ? 'Box3D' : k === 'sphere3d' ? 'Sphere3D' :
-          k === 'plane3d' ? 'Plane3D' : k === 'cylinder3d' ? 'Cylinder3D' :
-          k === 'model3d' ? 'Model3D' : '') : '',
+      name: defaultNameFor(k),
       kind: k === 'button' ? 'text' : k === 'panel' ? 'panel' :
         k === 'empty' || k === 'camera3d' ? 'sprite' : k,
       archetype: k,

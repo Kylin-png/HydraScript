@@ -4203,6 +4203,21 @@ function picUnlink() { return `<circle cx="22" cy="28" r="4.5" fill="none" strok
 // A ring with a double-headed shift arrow below: move the attachment to
 // a new offset. Ring centered on x=28, arrow shaft 20..36 at y=35.
 function picOffsetLink() { return `<circle cx="28" cy="24" r="5" fill="none" stroke="${W}" stroke-width="2.5"/><path d="M 20 35 L 36 35" stroke="${W}" stroke-width="2" stroke-linecap="round"/><polygon points="20,35 25,32 25,38" fill="${W}"/><polygon points="36,35 31,32 31,38" fill="${W}"/>`; }
+// P4 Advanced batches 34-36 (tags / pick-by-tag / minimap): a price-tag
+// label, point left, hole ring right. The point (19, 28) and the hole
+// (33, 28) both sit on the center line, so the mark reads the same
+// turned half a turn about the block center (28, 28).
+function picTag() { return `<path d="M 23 22 L 37 22 L 37 34 L 23 34 L 19 28 Z" fill="none" stroke="${W}" stroke-width="2" stroke-linejoin="round"/><circle cx="33" cy="28" r="2" fill="none" stroke="${W}" stroke-width="2"/>`; }
+// The tag with a slash through it: clear every tag. The slash runs
+// (21, 21) to (35, 35), through the center, so it maps to itself
+// under a half turn about (28, 28).
+function picTagSlash() { return picTag() + `<path d="M 21 21 L 35 35" stroke="${W}" stroke-width="2.5" stroke-linecap="round"/>`; }
+// A level frame with the camera view inside it and two dots for
+// objects: the minimap. Frame (18, 20)-(38, 36) and view
+// (24, 24)-(32, 32) are both centered on (28, 28), and the dots
+// (22, 32) and (34, 24) swap under a half turn, so the whole mark
+// is symmetric about the block center.
+function picMap() { return `<rect x="18" y="20" width="20" height="16" fill="none" stroke="${W}" stroke-width="2"/><rect x="24" y="24" width="8" height="8" fill="none" stroke="${W}" stroke-width="2"/><circle cx="22" cy="32" r="1.5" fill="${W}"/><circle cx="34" cy="24" r="1.5" fill="${W}"/>`; }
 function picSearch() { return `<circle cx="25" cy="25" r="6" fill="none" stroke="${W}" stroke-width="2.5"/><path d="M 29.5 29.5 L 36 36" stroke="${W}" stroke-width="2.5" stroke-linecap="round"/>`; }
 function picSort() { return `<path d="M 22 26 L 28 20 L 34 26 M 22 30 L 28 36 L 34 30" fill="none" stroke="${W}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`; }
 function picShuffle() { return `<path d="M 19 32 L 37 24 M 33 24 L 37 24 L 37 28 M 19 24 L 37 32 M 33 32 L 37 32 L 37 28" fill="none" stroke="${W}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`; }
@@ -4416,6 +4431,7 @@ const SM = {
   sun: `<circle cx="36" cy="36" r="2.5" fill="${W}"/><path d="M 36 30.5 L 36 32 M 36 40 L 36 41.5 M 30.5 36 L 32 36 M 40 36 L 41.5 36" stroke="${W}" stroke-width="1.5" stroke-linecap="round"/>`,
   cross: `<circle cx="36" cy="36" r="3.5" fill="none" stroke="${W}" stroke-width="1.5"/><path d="M 36 31.5 L 36 33 M 36 39 L 36 40.5 M 31.5 36 L 33 36 M 39 36 L 40.5 36" stroke="${W}" stroke-width="1.5"/>`,
   loop: `<path d="M 39 36 A 3.5 3.5 0 1 1 36 32.5" fill="none" stroke="${W}" stroke-width="2" stroke-linecap="round"/><polygon points="35,30.5 35,34 38,32" fill="${W}"/>`,
+  tag: `<polygon points="34,33 40,33 40,39 34,39 32,36" fill="${W}"/>`,
   q: icText('?', 37, 38, 9),
   eq: icText('=', 37, 38, 10),
   hash: icText('#', 37, 38, 10),
@@ -4673,7 +4689,30 @@ const CONCEPT_ICONS_BY_TYPE = {
   'attach-object-to-object': picChain(),
   'detach-object': picUnlink(),
   'set-attachment-offset': picOffsetLink(),
+  'set-attachment-follow': mod(picChain(), SM.loop),
   'is-attached': mod(picChain(), SM.q),
+  // Tags / pick-by-tag / minimap (P4 Advanced batches 34-36): the 16
+  // blocks from the tag, pick-by-tag and minimap batches each carry a
+  // unique icon, so they never fall back to a text label on the grid
+  // (a text label overflows the 56px cell and clips at the grid edge).
+  // The tag mark carries a badge for the operation, the map mark the
+  // same, and the random pick reuses the dice with a tag badge.
+  'add-tag': mod(picTag(), SM.plus),
+  'remove-tag': mod(picTag(), SM.x),
+  'clear-tags': picTagSlash(),
+  'read-tagged-count': mod(picTag(), SM.hash),
+  'has-tag': mod(picTag(), SM.q),
+  'tagged-count': mod(picTag(), SM.eq),
+  'pick-nearest-tagged': mod(picTag(), SM.n),
+  'pick-farthest-tagged': mod(picTag(), SM.f),
+  'pick-random-tagged': mod(picDice(), SM.tag),
+  'pick-tagged-object-into-variable': mod(picTag(), SM.box),
+  'for-each-tagged': mod(picTag(), SM.loop),
+  'show-minimap': mod(picMap(), SM.plus),
+  'hide-minimap': mod(picMap(), SM.minus),
+  'set-minimap-size': mod(picMap(), SM.box),
+  'set-minimap-zoom': mod(picMap(), SM.lens),
+  'minimap-visible': mod(picMap(), SM.q),
 };
 
 // --- Dispatch. BlockType first (specific), then family builders, then
@@ -4859,6 +4898,7 @@ function getAllObjectNames() {
 
 // Returns objects from the currently active scene by name
 function getObjectsByName(name, objectList) {
+  if (!name || (typeof name === 'string' && !name.trim())) return [];
   return (objectList || []).filter(o => o.name === name && o._alive !== false);
 }
 
@@ -5146,7 +5186,7 @@ function makeNote(text) { return HydraPropInputs.makeNote(text); }
 function makeInvertToggle(data, cellIndex, label = 'Invert condition') { return HydraPropInputs.makeInvertToggle(data, cellIndex, label); }
 
 // Object name dropdown populated from all scene objects
-function makeObjectSelect(value, onChange, includeAll = false) { return HydraPropInputs.makeObjectSelect(value, onChange, includeAll); }
+function makeObjectSelect(value, onChange, includeAll = false, allowBlank = false) { return HydraPropInputs.makeObjectSelect(value, onChange, includeAll, allowBlank); }
 
 // Named input actions defined on the project (Inputs tab). Returns the
 // normalized list; always an array, never throws.
@@ -6230,7 +6270,7 @@ function makeCatalogFieldInput(field, data, cellIndex, block) {
   }
   switch (field.control) {
     case 'object':
-      return makeObjectSelect(value, onChange, Boolean(field.includeAll));
+      return makeObjectSelect(value, onChange, Boolean(field.includeAll), true);
     case 'action':
       return makeActionSelect(value, onChange);
     case 'audio':
@@ -8278,6 +8318,19 @@ function addGameObject(kind, x, y) {
   const obj = window.HydraUniversal.createObject(kind, {
     id: nextObjectId++, posX: x, posY: y
   });
+  // A new object must arrive with a name no other object in the scene
+  // already has, or the pickers and the runtime cannot tell them apart.
+  {
+    const scene = getCurrentScene();
+    if (scene && Array.isArray(scene.objects)) {
+      const used = new Set(scene.objects.filter(o => o !== obj).map(o => o && o.name));
+      if (used.has(obj.name)) {
+        let n = 2;
+        while (used.has(obj.name + ' ' + n)) n++;
+        obj.name = obj.name + ' ' + n;
+      }
+    }
+  }
   obj.posX = snapSceneValue(x - obj.width / 2);
   obj.posY = snapSceneValue(y - obj.height / 2);
   const transform = obj.components?.find(c => c.type === 'Transform');
@@ -10186,11 +10239,29 @@ function showObjectProperties(obj) {
   summary.textContent = `${obj.archetype || obj.kind} · Layer ${obj.layer || 0} · #${obj.id}`;
   root.appendChild(summary);
 
-  // Name
+  // Name. A blank name is never saved: it is invisible to every
+  // object picker yet still matches a blank target at runtime, so
+  // clearing the field must restore the previous name instead.
+  // (makeTextInput fires per keystroke, so the guard runs on blur,
+  // when the name is committed, not while the user is still typing.)
+  const prevName = obj.name;
   const nameInput = makeTextInput(obj.name || '', 'e.g. player, wall1, score_text', v => {
     obj.name = v;
     renderObjectList();
   });
+  if (nameInput) {
+    nameInput.addEventListener('blur', () => {
+      const trimmed = (obj.name || '').trim();
+      if (!trimmed) {
+        obj.name = prevName || 'Sprite';
+        showObjectProperties(obj);
+        renderObjectList();
+      } else if (trimmed !== obj.name) {
+        obj.name = trimmed;
+        renderObjectList();
+      }
+    });
+  }
   root.appendChild(makePropGroup('Name:', nameInput));
 
   // P5-8 slice b: Visible / Locked, mirroring the outliner's eye

@@ -509,8 +509,10 @@
             <i class="fas fa-search"></i>
             <input id="block-search" type="search" placeholder="Search blocks" aria-label="Search blocks">
           </div>
-          <button type="button" class="logic-tool-btn subtle" id="logic-panel-dock-btn" title="Dock block panel on the left" aria-label="Dock block panel on the left"><i class="fas fa-columns"></i> <span>Dock left</span></button>
-          <button type="button" class="logic-tool-btn subtle" id="block-density-btn" title="Compact blocks" aria-label="Compact blocks"><i class="fas fa-compress"></i> <span>Compact blocks</span></button>
+          <div class="script-command-right">
+            <button type="button" class="logic-tool-btn subtle" id="logic-panel-dock-btn" title="Dock block panel on the left" aria-label="Dock block panel on the left"><i class="fas fa-columns"></i> <span>Dock left</span></button>
+            <button type="button" class="logic-tool-btn subtle" id="block-density-btn" title="Compact blocks" aria-label="Compact blocks"><i class="fas fa-compress"></i> <span>Compact blocks</span></button>
+          </div>
         </div>
 
         <div class="grid-editor">
@@ -710,24 +712,26 @@
           <div class="preview-device-label" id="preview-device-label" hidden>Desktop</div>
           <canvas id="game-canvas"></canvas>
         </div>
-        <div class="preview-controls">
-          <select id="preview-device-select" title="Preview device frame: see the game at phone or tablet size" aria-label="Preview device frame">
-            <option value="desktop">Desktop</option>
-            <option value="phone-portrait">Phone · portrait 390 × 844</option>
-            <option value="phone-landscape">Phone · landscape 844 × 390</option>
-            <option value="tablet-portrait">Tablet · portrait 768 × 1024</option>
-          </select>
-          <button id="preview-restart-btn" title="Restart" aria-label="Restart preview"><i class="fas fa-redo"></i></button>
-          <button id="preview-profiler-btn" title="Profiler overlay: FPS, frame time, and draw counts" aria-label="Toggle profiler overlay"><i class="fas fa-tachometer-alt"></i></button>
-          <button id="preview-trace-btn" title="Flow tracer: watch logic blocks fire, live" aria-label="Toggle flow tracer"><i class="fas fa-route"></i></button>
-        </div>
-        <div class="preview-variables" id="preview-variables-panel">
-          <button type="button" class="preview-variables-header" id="preview-variables-toggle">
-            <span><i class="fas fa-database"></i> Live variables</span>
-            <strong id="preview-variables-count">0</strong>
-          </button>
-          <div class="preview-variables-body" id="preview-variables" hidden>
-            <p class="hint-text">Launch the preview to see live values.</p>
+        <div class="preview-sidebar">
+          <div class="preview-controls">
+            <select id="preview-device-select" title="Preview device frame: see the game at phone or tablet size" aria-label="Preview device frame">
+              <option value="desktop">Desktop</option>
+              <option value="phone-portrait">Phone · portrait 390 × 844</option>
+              <option value="phone-landscape">Phone · landscape 844 × 390</option>
+              <option value="tablet-portrait">Tablet · portrait 768 × 1024</option>
+            </select>
+            <button id="preview-restart-btn" title="Restart" aria-label="Restart preview"><i class="fas fa-redo"></i></button>
+            <button id="preview-profiler-btn" title="Profiler overlay: FPS, frame time, and draw counts" aria-label="Toggle profiler overlay"><i class="fas fa-tachometer-alt"></i></button>
+            <button id="preview-trace-btn" title="Flow tracer: watch logic blocks fire, live" aria-label="Toggle flow tracer"><i class="fas fa-route"></i></button>
+          </div>
+          <div class="preview-variables" id="preview-variables-panel">
+            <button type="button" class="preview-variables-header" id="preview-variables-toggle">
+              <span><i class="fas fa-database"></i> Live variables</span>
+              <strong id="preview-variables-count">0</strong>
+            </button>
+            <div class="preview-variables-body" id="preview-variables" hidden>
+              <p class="hint-text">Launch the preview to see live values.</p>
+            </div>
           </div>
         </div>
         <div class="trace-panel" id="trace-panel" hidden>
