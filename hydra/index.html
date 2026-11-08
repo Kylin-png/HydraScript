@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hydra Script - Visual Game Development</title>
+  <link rel="icon" type="image/webp" href="logo.webp">
+  <link rel="stylesheet" href="style.css?v=20261104-brand1">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="app-loading-screen">
+    <div class="loading-content">
+      <div class="loading-logo">
+        <img class="loading-logo-icon" src="logo.webp" alt="HydraScript logo">
+        <span class="loading-logo-text">Hydra Script</span>
+      </div>
+      <div class="loading-status-container">
+        <div class="loading-text" id="loading-status">Initializing Engine...</div>
+        <div class="loading-progress-bg">
+          <div class="loading-progress-fill" id="loading-progress-bar"></div>
+        </div>
+        <div class="loading-subtext" id="loading-subtext">Loading core modules...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <img class="logo-icon" src="logo.webp" alt="HydraScript logo">
+      <h1>Hydra Script</h1>
+    </div>
+    <div class="project-controls">
+      <div class="project-info">
+        <span class="project-label">Project</span>
+        <span id="project-name" contenteditable="true" title="Click to rename">Untitled Project</span>
+      </div>
+      <div class="project-actions">
+        <button id="save-project-btn" title="Save Project"><i class="fas fa-save"></i> Save</button>
+        <button id="new-project-btn" title="Start a new project from a template"><i class="fas fa-plus"></i> New</button>
+        <button id="import-json-btn" title="Import a project JSON (.hydra) file"><i class="fas fa-file-import"></i> Import JSON</button>
+        <button id="export-json-btn" title="Download this project as a JSON (.hydra) file"><i class="fas fa-file-code"></i> Export JSON</button>
+        <input type="file" id="import-json-file" accept=".hydra,.json,application/json" hidden>
+        <button id="export-playable-btn" title="Export playable HTML"><i class="fas fa-file-export"></i> Export Game</button>
+        <button id="home-btn" title="Return to Home"><i class="fas fa-home"></i> Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="scene-tab"><i class="fas fa-cubes"></i> Scene / Entities</div>
+    <div class="tab" data-tab="script-tab"><i class="fas fa-code-branch"></i> Logic</div>
+    <div class="tab" data-tab="preview-tab"><i class="fas fa-play-circle"></i> Preview</div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- P3 item 21: guided first-run tutorial panel. Shown only for projects
+         built from the First Game Tutorial template (project.tutorial), until
+         the user dismisses it; the wiring lives in script.js. -->
+    <div class="tutorial-panel" id="tutorial-panel" hidden>
+      <div class="tutorial-panel-title">First game tutorial</div>
+      <ol class="tutorial-panel-steps">
+        <li>This scene already has a player, a coin, and a score. Drag the player around to see the scene.</li>
+        <li>Open Logic to see the blocks that move the player and score the coin.</li>
+        <li>Open Preview, then use the arrow keys to move and touch the coin.</li>
+      </ol>
+      <div class="tutorial-panel-actions">
+        <button type="button" id="tutorial-open-logic-btn">Open Logic</button>
+        <button type="button" id="tutorial-open-preview-btn">Open Preview</button>
+        <button type="button" id="tutorial-dismiss-btn">Hide this guide</button>
+      </div>
+    </div>
+
+    <!-- ========== SCENE EDITOR TAB ========== -->
+    <div class="tab-content active" id="scene-tab">
+      <div class="scene-editor">
+        <div class="scene-container" tabindex="0">
+          <div class="scene-toolbar" aria-label="Scene tools">
+            <div class="scene-switcher">
+              <select id="scene-switcher-select" title="Switch scene"></select>
+              <button class="scene-tool-btn" id="scene-rename-btn" title="Rename scene" aria-label="Rename scene"><i class="fas fa-edit"></i></button>
+              <button class="scene-tool-btn" id="scene-toolbar-add-btn" title="Add scene" aria-label="Add scene"><i class="fas fa-plus"></i></button>
+              <button class="scene-tool-btn danger" id="scene-toolbar-delete-btn" title="Delete scene" aria-label="Delete scene"><i class="fas fa-times"></i></button>
+            </div>
+            <span class="scene-tool-divider"></span>
+            <button class="scene-tool-btn active" id="scene-snap-btn" title="Toggle snap to grid" aria-label="Toggle snap to grid"><i class="fas fa-magnet"></i></button>
+            <button class="scene-tool-btn" id="scene-zoom-out-btn" title="Zoom out" aria-label="Zoom out"><i class="fas fa-search-minus"></i></button>
+            <span class="scene-zoom-readout" id="scene-zoom-readout">100%</span>
+            <button class="scene-tool-btn" id="scene-zoom-in-btn" title="Zoom in" aria-label="Zoom in"><i class="fas fa-search-plus"></i></button>
+            <span class="scene-tool-divider" id="scene-3d-view-divider" style="display:none"></span>
+            <div class="scene-view-toggle" id="scene-3d-view-toggle" style="display:none" role="group" aria-label="Scene view">
+              <button type="button" class="scene-view-btn active" id="scene-view-layout-btn" title="Layout view: place and drag objects on the flat stage">Layout</button>
+              <button type="button" class="scene-view-btn" id="scene-view-3d-btn" title="3D view: the true perspective render of this scene, same as Preview"><i class="fas fa-cube"></i> 3D view</button>
+            </div>
+            <span class="scene-tool-divider"></span>
+            <button class="scene-tool-btn" id="scene-duplicate-btn" title="Duplicate selected object" aria-label="Duplicate selected object"><i class="fas fa-clone"></i></button>
+            <button class="scene-tool-btn" id="scene-center-btn" title="Center selected object" aria-label="Center selected object"><i class="fas fa-crosshairs"></i></button>
+            <button class="scene-tool-btn" id="scene-front-btn" title="Bring forward" aria-label="Bring selected object forward"><i class="fas fa-layer-group"></i></button>
+            <button class="scene-tool-btn" id="scene-back-btn" title="Send backward" aria-label="Send selected object backward"><i class="fas fa-level-down-alt"></i></button>
+            <button class="scene-tool-btn danger" id="scene-delete-btn" title="Delete selected object" aria-label="Delete selected object"><i class="fas fa-trash"></i></button>
+            <span class="scene-tool-divider"></span>
+            <button class="scene-tool-btn" id="scene-panel-dock-btn" title="Dock inspector panel on the left" aria-label="Dock inspector panel on the left"><i class="fas fa-columns"></i></button>
+          </div>
+          <div class="scene" id="scene-canvas"></div>
+        </div>
+
+        <!-- P5-2 slice d: drag handle on the inspector's left edge.
+             Drag to resize the panel (double-click to reset); arrow
+             keys resize it too when the handle has focus. -->
+        <div class="panel-resizer" id="scene-panel-resizer" role="separator" aria-orientation="vertical" aria-label="Resize inspector panel" aria-valuemin="240" aria-valuemax="560" aria-valuenow="340" tabindex="0" title="Drag to resize the inspector panel (double-click to reset)"></div>
+        <div class="scene-side-panel">
+          <div class="inspector-tabs" id="scene-inspector-tabs">
+            <button type="button" class="inspector-tab active" data-inspector-tab="scenes"><i class="fas fa-film"></i><span>Scenes</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="objects"><i class="fas fa-sitemap"></i><span>Hierarchy</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="world"><i class="fas fa-sliders-h"></i><span>World</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="create"><i class="fas fa-plus"></i><span>Create</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="inspect"><i class="fas fa-edit"></i><span>Inspector</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="assets"><i class="fas fa-folder-open"></i><span>Assets</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="inputs"><i class="fas fa-gamepad"></i><span>Inputs</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="audio"><i class="fas fa-volume-up"></i><span>Audio</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="localization"><i class="fas fa-language"></i><span>Localization</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="dialogues"><i class="fas fa-comments"></i><span>Dialogues</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="items"><i class="fas fa-backpack"></i><span>Items</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="quests"><i class="fas fa-scroll"></i><span>Quests</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="achievements"><i class="fas fa-trophy"></i><span>Achievements</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="cutscenes"><i class="fas fa-video"></i><span>Cutscenes</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="highscores"><i class="fas fa-medal"></i><span>High Scores</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="variables"><i class="fas fa-database"></i><span>Variables</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="functions"><i class="fas fa-code"></i><span>Functions</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="transitions"><i class="fas fa-exchange-alt"></i><span>Transitions</span></button>
+            <button type="button" class="inspector-tab" data-inspector-tab="joystick"><i class="fas fa-gamepad"></i><span>Joystick</span></button>
+          </div>
+
+          <!-- Scene List -->
+          <div class="panel-section inspector-panel active" data-inspector-panel="scenes">
+            <div class="panel-section-header">
+              <h3>Scenes</h3>
+              <button id="add-scene-btn" class="icon-btn" title="Add Scene" aria-label="Add Scene"><i class="fas fa-plus"></i></button>
+            </div>
+            <div id="scene-list" class="scene-list"></div>
+          </div>
+
+          <!-- Object list -->
+          <div class="panel-section inspector-panel" data-inspector-panel="objects">
+            <div class="panel-section-header">
+              <h3>Hierarchy</h3>
+              <span class="panel-count" id="scene-object-count">0</span>
+            </div>
+            <div class="hierarchy-search-wrap">
+              <i class="fas fa-search"></i>
+              <input id="entity-search" type="search" placeholder="Search entities" aria-label="Search entities">
+            </div>
+            <div id="scene-object-list" class="scene-object-list" tabindex="0" aria-label="Scene hierarchy: arrow keys move the selection, Enter opens the Inspector"></div>
+          </div>
+
+          <!-- Scene settings -->
+          <div class="panel-section inspector-panel" id="scene-settings-panel" data-inspector-panel="world">
+            <h3>Scene Settings</h3>
+            <div class="prop-group">
+              <label>Background Color</label>
+              <input type="color" id="scene-bg-color" class="property-input" style="height:36px;" value="#ffffff" aria-label="Background color">
+            </div>
+            <div class="prop-group">
+              <label>Background Image</label>
+              <button class="upload-btn" id="scene-bg-upload-btn"><i class="fas fa-image"></i> Upload Image</button>
+              <input type="file" id="scene-bg-file" accept="image/*" style="display:none">
+              <button class="clear-btn" id="scene-bg-clear-btn" style="display:none"><i class="fas fa-times"></i> Clear</button>
+            </div>
+            <div class="prop-group">
+              <label>Render Mode</label>
+              <select id="scene-render-mode" class="property-input" aria-label="Render mode">
+                <option value="2d">2D (classic)</option>
+                <option value="3d">3D (perspective)</option>
+              </select>
+              <p class="hint-text">3D scenes render with the built-in perspective camera — the same view you see in Preview. 2D objects keep drawing on top; HUD widgets still work.</p>
+            </div>
+            <div id="scene-2d-lighting-wrap">
+              <div class="prop-group">
+                <label>Darkness (2D lighting)</label>
+                <input type="range" id="scene-darkness" class="property-input" min="0" max="100" step="1" title="0 = fully lit, 100 = pitch black">
+                <p class="hint-text">Dims the whole scene. Lights punch soft holes in the darkness; objects with Cast shadow checked block the light. 0 = day, 100 = pitch black. Use the Set Darkness block to change it while the game runs.</p>
+              </div>
+              <div class="prop-group">
+                <label>Darkness tint</label>
+                <input type="color" id="scene-darkness-color" class="property-input" style="height:36px;" value="#000000" aria-label="Darkness tint">
+              </div>
+            </div>
+            <div id="scene-camera-feel-wrap">
+              <div class="prop-group">
+                <label>Camera smoothing</label>
+                <input type="number" id="scene-cam-smoothing" class="property-input" min="0" max="0.95" step="0.05" title="0 = snap, 0.9 = slow glide">
+                <p class="hint-text">How gently the camera chases the followed object. 0 snaps at once; 0.5 glides halfway there each frame; 0.9 is a slow cinematic drift. Use the Set Camera Smoothing block to change it while the game runs.</p>
+              </div>
+              <div class="prop-group">
+                <label>Camera deadzone (world px)</label>
+                <div style="display:flex;gap:6px">
+                  <input type="number" id="scene-cam-deadzone-w" class="property-input" min="0" step="10" title="Deadzone width" placeholder="Width">
+                  <input type="number" id="scene-cam-deadzone-h" class="property-input" min="0" step="10" title="Deadzone height" placeholder="Height">
+                </div>
+                <p class="hint-text">A rectangle around the center of the screen. While the followed object stays inside it the camera does not move. 0 x 0 turns the deadzone off.</p>
+              </div>
+              <div class="prop-group">
+                <label>Camera bounds (world px)</label>
+                <div style="display:flex;gap:6px">
+                  <input type="number" id="scene-cam-bounds-minx" class="property-input" step="10" title="Bounds min X" placeholder="Min X">
+                  <input type="number" id="scene-cam-bounds-miny" class="property-input" step="10" title="Bounds min Y" placeholder="Min Y">
+                </div>
+                <div style="display:flex;gap:6px;margin-top:6px">
+                  <input type="number" id="scene-cam-bounds-maxx" class="property-input" step="10" title="Bounds max X" placeholder="Max X">
+                  <input type="number" id="scene-cam-bounds-maxy" class="property-input" step="10" title="Bounds max Y" placeholder="Max Y">
+                </div>
+                <p class="hint-text">A world rectangle the camera view stays inside, so the camera never shows past the edge of a room. Leave all four blank for no bounds (the scene edges apply). Use the Set / Clear Camera Bounds blocks to change them while the game runs.</p>
+                <button class="clear-btn" id="scene-cam-bounds-clear-btn"><i class="fas fa-times"></i> Clear bounds</button>
+              </div>
+            </div>
+            <div id="scene-minimap-wrap">
+              <div class="prop-group">
+                <label>Minimap</label>
+                <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="scene-minimap-enabled"> <span>Show a minimap in this scene</span></label>
+                <p class="hint-text">A small live map in a corner, with a dot for every live object and a white rectangle for what the camera sees. The boss draws red, an object tagged player draws white, other tagged objects draw in their tag's color. Use the Show / Hide Minimap blocks to change it while the game runs.</p>
+              </div>
+              <div class="prop-group">
+                <label>Minimap corner</label>
+                <select id="scene-minimap-corner" class="property-input" aria-label="Minimap corner">
+                  <option value="top-right">Top right</option>
+                  <option value="top-left">Top left</option>
+                  <option value="bottom-right">Bottom right</option>
+                  <option value="bottom-left">Bottom left</option>
+                </select>
+              </div>
+              <div class="prop-group">
+                <label>Minimap size (px)</label>
+                <input type="number" id="scene-minimap-size" class="property-input" min="80" max="400" step="10" title="80 to 400 pixels on a side">
+              </div>
+              <div class="prop-group">
+                <label>Minimap zoom</label>
+                <input type="number" id="scene-minimap-zoom" class="property-input" min="1" max="4" step="0.5" title="1 = the whole scene, 2 = half of it around the camera">
+                <p class="hint-text">1 fits the whole scene. Above 1 the map shows a window around the camera instead — 2 shows half the level, 4 shows a quarter — so a zoomed map follows the player. Use the Set Minimap Zoom block to change it while the game runs.</p>
+              </div>
+              <div class="prop-group">
+                <label>Minimap viewport</label>
+                <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="scene-minimap-viewport"> <span>Outline what the camera sees</span></label>
+              </div>
+            </div>
+            <div id="scene-3d-camera-wrap" style="display:none">
+              <div class="prop-group">
+                <label>3D Camera Position</label>
+                <div style="display:flex;gap:6px">
+                  <input type="number" id="scene-cam3d-x" class="property-input" step="10" title="Camera X" placeholder="X">
+                  <input type="number" id="scene-cam3d-y" class="property-input" step="10" title="Camera Y" placeholder="Y">
+                  <input type="number" id="scene-cam3d-z" class="property-input" step="10" title="Camera Z" placeholder="Z">
+                </div>
+              </div>
+              <div class="prop-group">
+                <label>3D Camera Look-At</label>
+                <div style="display:flex;gap:6px">
+                  <input type="number" id="scene-cam3d-tx" class="property-input" step="10" title="Look-at X" placeholder="X">
+                  <input type="number" id="scene-cam3d-ty" class="property-input" step="10" title="Look-at Y" placeholder="Y">
+                  <input type="number" id="scene-cam3d-tz" class="property-input" step="10" title="Look-at Z" placeholder="Z">
+                </div>
+              </div>
+              <div class="prop-group">
+                <label>3D Camera FOV</label>
+                <input type="number" id="scene-cam3d-fov" class="property-input" min="10" max="120" step="1" title="Field of view in degrees">
+                <p class="hint-text">Frames the camera used by the 3D view, Preview, and exported games. Reset re-frames the whole scene.</p>
+                <button class="clear-btn" id="scene-cam3d-reset-btn" type="button"><i class="fas fa-crosshairs"></i> Reset to frame scene</button>
+              </div>
+              <div class="prop-group">
+                <label>3D Shadows</label>
+                <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="scene-shadows3d"> <span>Soft blob shadows under 3D objects</span></label>
+                <p class="hint-text">Draws a soft dark ellipse under each 3D object on the ground plane below. Simple and cheap — not real shadow mapping.</p>
+              </div>
+              <div class="prop-group">
+                <label>Shadow Ground Y</label>
+                <input type="number" id="scene-shadow-ground-y" class="property-input" step="10" title="Y of the ground plane shadows fall on" placeholder="600">
+                <p class="hint-text">The Y of the invisible ground plane shadows land on. Blank = the bottom of the world.</p>
+              </div>
+            </div>
+            <div class="prop-group">
+              <label>Canvas Width</label>
+              <input type="number" id="scene-width" class="property-input" value="800" min="100" max="4000" step="10" aria-label="Canvas width">
+            </div>
+            <div class="prop-group">
+              <label>Canvas Height</label>
+              <input type="number" id="scene-height" class="property-input" value="600" min="100" max="4000" step="10" aria-label="Canvas height">
+            </div>
+            <div class="prop-group">
+              <label>Viewport Width</label>
+              <input type="number" id="scene-viewport-width" class="property-input" value="800" min="100" max="4000" step="10" aria-label="Viewport width">
+            </div>
+            <div class="prop-group">
+              <label>Viewport Height</label>
+              <input type="number" id="scene-viewport-height" class="property-input" value="600" min="100" max="4000" step="10" aria-label="Viewport height">
+            </div>
+          </div>
+
+          <!-- Add Object -->
+          <div class="panel-section inspector-panel" data-inspector-panel="create">
+            <div class="panel-section-header">
+              <h3>Create</h3>
+            </div>
+            <div class="object-create-grid">
+              <button type="button" class="object-create-btn" data-create-kind="empty" draggable="true"><i class="far fa-circle"></i> Empty</button>
+              <button type="button" class="object-create-btn" data-create-kind="sprite" draggable="true"><i class="fas fa-square"></i> Sprite</button>
+              <button type="button" class="object-create-btn" data-create-kind="text" draggable="true"><i class="fas fa-font"></i> Text</button>
+              <button type="button" class="object-create-btn" data-create-kind="button" draggable="true"><i class="fas fa-mouse-pointer"></i> Button</button>
+              <button type="button" class="object-create-btn" data-create-kind="panel" draggable="true"><i class="fas fa-square-full"></i> Panel</button>
+              <button type="button" class="object-create-btn" data-create-kind="tilemap" draggable="true"><i class="fas fa-th"></i> Tilemap</button>
+              <button type="button" class="object-create-btn" data-create-kind="box3d" draggable="true"><i class="fas fa-cube"></i> Box 3D</button>
+              <button type="button" class="object-create-btn" data-create-kind="sphere3d" draggable="true"><i class="fas fa-circle"></i> Sphere 3D</button>
+              <button type="button" class="object-create-btn" data-create-kind="plane3d" draggable="true"><i class="fas fa-square"></i> Plane 3D</button>
+              <button type="button" class="object-create-btn" data-create-kind="cylinder3d" draggable="true"><i class="fas fa-database"></i> Cylinder 3D</button>
+              <button type="button" class="object-create-btn" data-create-kind="model3d" draggable="true"><i class="fas fa-shapes"></i> Model 3D</button>
+              <button type="button" class="object-create-btn" data-create-kind="camera3d" draggable="true"><i class="fas fa-video"></i> Camera 3D</button>
+              <button type="button" class="object-create-btn" data-create-kind="light" draggable="true" title="Light — a 2D light in 2D scenes, a 3D light in 3D scenes"><i class="fas fa-lightbulb"></i> Light</button>
+            </div>
+            <div class="add-object-row">
+              <select id="new-object-kind" class="property-input" aria-label="Object kind to add">
+                <option value="empty">Empty Entity</option>
+                <option value="sprite">Sprite / Shape</option>
+                <option value="text">Text</option>
+                <option value="button">Button</option>
+                <option value="panel">Panel</option>
+                <option value="tilemap">Tilemap</option>
+                <option value="box3d">Box 3D</option>
+                <option value="sphere3d">Sphere 3D</option>
+                <option value="plane3d">Plane 3D</option>
+                <option value="cylinder3d">Cylinder 3D</option>
+                <option value="model3d">Model 3D</option>
+                <option value="camera3d">3D Camera</option>
+                <option value="light2d">2D Light</option>
+                <option value="light3d">3D Light</option>
+              </select>
+              <button id="add-object-btn" class="icon-btn" title="Click on canvas to place, or add at center"><i class="fas fa-plus"></i> Add Entity</button>
+            </div>
+            <p class="hint-text">Entities can become web UI, 2D game objects, 3D actors, or pure logic containers by adding components.</p>
+          </div>
+
+          <!-- Object Properties -->
+          <div class="panel-section inspector-panel" id="obj-properties-section" data-inspector-panel="inspect">
+            <div class="panel-section-header">
+              <h3>Inspector</h3>
+            </div>
+            <div id="object-properties">
+              <p class="hint-text">Click an object in the scene to select it.</p>
+            </div>
+          </div>
+
+          <!-- Asset Manager -->
+          <div class="panel-section inspector-panel" data-inspector-panel="assets">
+            <div class="panel-section-header">
+              <h3>Assets</h3>
+              <button id="asset-upload-btn" class="icon-btn" title="Upload images, audio, GIFs, or 3D models (.glb/.gltf)" aria-label="Upload asset"><i class="fas fa-upload"></i></button>
+            </div>
+            <input type="file" id="asset-upload-file" accept="image/*,audio/*,.gif,.glb,.gltf" multiple style="display:none">
+            <p class="asset-storage-summary" id="asset-storage-summary"></p>
+            <div id="asset-list" class="asset-list"></div>
+            <p class="hint-text">Images, audio files, and GIFs live here. Anything not used by a sprite or a scene background is marked unused, and safe to delete.</p>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="inputs">
+            <div class="panel-section-header">
+              <h3>Input Actions</h3>
+              <div>
+                <button id="input-action-preset-btn" class="icon-btn" title="Add a ready-made platformer set (Move Left, Move Right, Jump, Shoot, Interact)" aria-label="Add ready-made platformer input actions"><i class="fas fa-magic"></i></button>
+                <button id="input-action-add-btn" class="icon-btn" title="Add a new input action" aria-label="Add a new input action"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+            <p class="hint-text">Name an action once, then bind keys, a gamepad button, and a touch zone to it. Blocks read the action — not the raw key — so the same logic works on keyboard, gamepad, and touchscreen, and players can remap keys in-game.</p>
+            <div id="input-action-list" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="audio">
+            <div class="panel-section-header">
+              <h3>Audio Buses</h3>
+            </div>
+            <p class="hint-text">Every sound plays through a bus. Music streams (long tracks stay out of memory, one at a time, loops by default); SFX and UI sounds are decoded once and kept in memory. Blocks can change bus volume and mute while the game runs too.</p>
+            <div id="audio-bus-list" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="localization">
+            <div class="panel-section-header">
+              <h3>Localization</h3>
+              <div>
+                <button id="localization-add-language-btn" class="icon-btn" title="Add a language" aria-label="Add a language"><i class="fas fa-plus"></i></button>
+                <button id="localization-add-entry-btn" class="icon-btn" title="Add a string" aria-label="Add a string"><i class="fas fa-font"></i></button>
+              </div>
+            </div>
+            <p class="hint-text">One string table for the whole game: name a key once (for example play_button), write it in every language, then read it with Set Text from Key or bind a text object to it. Set Language switches every bound label at once; a missing translation falls back to the default language.</p>
+            <div id="localization-panel" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="dialogues">
+            <div class="panel-section-header">
+              <h3>Dialogues</h3>
+              <div>
+                <button id="dialogues-add-btn" class="icon-btn" title="Add a dialogue" aria-label="Add a dialogue"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+            <p class="hint-text">Named conversations for the whole game: one line per row (who speaks, what they say), with choices that jump to another line. Start one with the Start Dialogue block, picking the two text objects the speaker and line appear in; advance it with a key or a Next button, and build choice buttons with Set Choice Text.</p>
+            <div id="dialogues-panel" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="items">
+            <div class="panel-section-header">
+              <h3>Items</h3>
+              <div>
+                <button id="items-add-btn" class="icon-btn" title="Add an item" aria-label="Add an item"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+            <p class="hint-text">Named items the player can carry: a key, a potion, a gem. Set the max stack (how many fit in the backpack at once; 1 makes a unique item) and a short description. Add them with the Add Item block, gate doors and shops with Has Item and Item Count, and read a count into a variable with Read Item Count.</p>
+            <div id="items-panel" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="quests">
+            <div class="panel-section-header">
+              <h3>Quests</h3>
+              <div>
+                <button id="quests-add-btn" class="icon-btn" title="Add a quest" aria-label="Add a quest"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+            <p class="hint-text">Named objectives the player works through: collect 4 coins, defeat 3 enemies, reach the goal. Set the target (how much progress finishes the quest; 1 is a one-shot quest) and a short description. Add progress with the Add Quest Progress block, gate rewards and endings with Quest Complete and Quest Progress, and read progress into a variable with Read Quest Progress.</p>
+            <div id="quests-panel" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="achievements">
+            <div class="panel-section-header">
+              <h3>Achievements</h3>
+              <div>
+                <button id="achievements-add-btn" class="icon-btn" title="Add an achievement" aria-label="Add an achievement"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+            <p class="hint-text">Permanent trophies the player earns: beat every level, collect 100 coins, finish without dying. Unlike quests, which reset on a fresh run, an unlocked achievement stays unlocked across runs, scenes, and restarts. Unlock one with the Unlock Achievement block, gate rewards and endings with Achievement Unlocked and Achievement Count, and reset them all with Reset Achievements.</p>
+            <div id="achievements-panel" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="cutscenes">
+            <div class="panel-section-header">
+              <h3>Cutscenes</h3>
+              <div>
+                <button id="cutscenes-add-btn" class="icon-btn" title="Add a cutscene" aria-label="Add a cutscene"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+            <p class="hint-text">Scripted scenes the game plays by itself: an intro, a level transition, an ending. Each cutscene is a list of steps that run in order — wait, show text in a label, glide an object somewhere, play a sound, switch scene. Play one with the Play Cutscene block, gate the HUD and player input on Cutscene Playing, and run what happens next on Cutscene Finished.</p>
+            <div id="cutscenes-panel" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="highscores">
+            <div class="panel-section-header">
+              <h3>High Scores</h3>
+            </div>
+            <p class="hint-text">The ranked leaderboard the game keeps for itself: the best scores, best first, kept across runs, scenes, and restarts like the achievements. Set how many entries the table holds and the default name for a score submitted without one, then submit scores with the Submit Score block, gate a "New best!" moment on Is High Score, and read ranks back into variables with Read High Score.</p>
+            <div id="highscores-panel" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="variables">
+            <div class="panel-section-header">
+              <h3>Variables</h3>
+            </div>
+            <p class="hint-text">The scoped variables this game starts with: Global keeps a value for the whole run, Scene keeps one per scene (each visit starts from its starting value), Object keeps one per object name (the goblin's hp is not the hero's). Create one here and it exists from the first frame, no block needed; change it with the Set Scoped Variable block while the game runs. To watch the values change while you play, open Live variables in the Preview tab.</p>
+            <div id="variables-panel" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="functions">
+            <div class="panel-section-header">
+              <h3>Functions</h3>
+            </div>
+            <p class="hint-text">Reusable block chains: define a function once here (a name, up to eight parameters, and a body grid like any other scope), then call it from any row with the Call Function block. The parameters arrive as local variables, so two calls never see each other's values; Return hands a value back to the caller and stops the body. Edit body opens the function's own grid in the Logic tab.</p>
+            <div id="functions-panel" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="transitions">
+            <div class="panel-section-header">
+              <h3>Transitions</h3>
+            </div>
+            <p class="hint-text">How scene changes look when they use the Transition to Scene block instead of an instant cut: the screen fades to black (or a black panel wipes across), the scene switches under full cover, then it fades back in on the new scene. Set the default effect and total time here; each block can override both for one switch, or leave them on Default. The plain Switch Scene block stays an instant cut.</p>
+            <div id="transitions-panel" class="asset-list"></div>
+          </div>
+          <div class="panel-section inspector-panel" data-inspector-panel="joystick">
+            <div class="panel-section-header">
+              <h3>Joystick</h3>
+            </div>
+            <p class="hint-text">The on-screen stick for touchscreen play: a fixed base circle in a screen corner with a knob the player drags to steer. It writes its tilt into two game variables every frame (left is -1, right is 1, up is -1, down is 1; released it reads 0), and it can drive up to four named input actions from the Inputs tab, so a keyboard game becomes a phone game by naming four actions. Turn it on here to have it from the start, or flip it during play with the Enable / Disable Joystick blocks. A mouse drag grabs it too, for desktop playtesting.</p>
+            <div id="joystick-panel" class="asset-list"></div>
+          </div>
+
+          <button id="clearSceneButton" class="danger-btn inspector-panel" data-inspector-panel="world"><i class="fas fa-trash"></i> Clear Scene</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== SCRIPT EDITOR TAB ========== -->
+    <div class="tab-content" id="script-tab">
+      <div class="script-editor-layout">
+
+        <!-- Script scope selector -->
+        <div class="script-scope-bar">
+          <div class="scope-tabs" id="scope-tabs">
+            <div class="scope-tab active" data-scope="global">
+              <i class="fas fa-globe"></i> Global
+            </div>
+            <!-- Scene scope tabs injected here -->
+          </div>
+          <div class="scope-info" id="scope-info">Global script runs across all scenes</div>
+        </div>
+
+        <div class="script-command-bar">
+          <div class="script-command-left">
+            <button type="button" class="logic-tool-btn" id="add-condition-tool"><i class="fas fa-filter"></i> Add Condition</button>
+            <button type="button" class="logic-tool-btn" id="add-action-tool"><i class="fas fa-bolt"></i> Add Action</button>
+            <button type="button" class="logic-tool-btn subtle" id="add-comment-tool"><i class="fas fa-comment-alt"></i> Comment</button>
+            <div class="script-stat"><span id="script-block-count">0</span> blocks</div>
+            <div class="script-stat muted" id="script-active-tool">Select / Erase</div>
+          </div>
+          <div class="script-search-wrap">
+            <i class="fas fa-search"></i>
+            <input id="block-search" type="search" placeholder="Search blocks" aria-label="Search blocks">
+          </div>
+          <button type="button" class="logic-tool-btn subtle" id="logic-panel-dock-btn" title="Dock block panel on the left" aria-label="Dock block panel on the left"><i class="fas fa-columns"></i> <span>Dock left</span></button>
+          <button type="button" class="logic-tool-btn subtle" id="block-density-btn" title="Compact blocks" aria-label="Compact blocks"><i class="fas fa-compress"></i> <span>Compact blocks</span></button>
+        </div>
+
+        <div class="grid-editor">
+          <div class="grid-container" tabindex="0" aria-label="Logic grid. Tab to a cell, then use the arrow keys to move between cells, Enter to place or select a block, and Delete to clear a cell.">
+            <div class="grid" id="grid"></div>
+          </div>
+
+          <!-- P5-2 slice d: drag handle on the logic panel's left edge.
+               Drag to resize the panel (double-click to reset); arrow
+               keys resize it too when the handle has focus. -->
+          <div class="panel-resizer" id="logic-panel-resizer" role="separator" aria-orientation="vertical" aria-label="Resize logic panel" aria-valuemin="240" aria-valuemax="520" aria-valuenow="320" tabindex="0" title="Drag to resize the logic panel (double-click to reset)"></div>
+
+          <div class="side-panel">
+            <div id="block-type-panel" class="panel-section">
+              <h3>Block Type</h3>
+              <div class="block-selector">
+
+                <div class="block-category-label">Triggers</div>
+                <div class="block-option selected" data-block-type="none" title="Leaves the cell empty. Pick this to clear a block.">
+                  <div class="block-color" style="background:#555;"></div>
+                  <div class="block-label">Select / Erase</div>
+                </div>
+                <div class="block-option" data-block-type="game-start" title="Fires once when the preview or exported game starts. Use it for setup: place objects, set scores, start music.">
+                  <div class="block-color" style="background:#10b981;"></div>
+                  <div class="block-label">On Game Start</div>
+                </div>
+                <div class="block-option" data-block-type="condition" title="Fires while a key is held, pressed, or released. Pick the key and the timing in the block settings.">
+                  <div class="block-color condition-color"></div>
+                  <div class="block-label">Keyboard</div>
+                </div>
+                <div class="block-option" data-block-type="mouse-condition" title="Fires on a mouse click, hold, or release. Pick the button and the timing in the block settings.">
+                  <div class="block-color" style="background:#0284c7;"></div>
+                  <div class="block-label">Mouse Click</div>
+                </div>
+                <div class="block-option" data-block-type="advanced-condition" title="Checks collisions, overlaps, screen edges, and other world states. Pick the check in the block settings.">
+                  <div class="block-color advanced-condition-color"></div>
+                  <div class="block-label">Collision</div>
+                </div>
+                <div class="block-option" data-block-type="overlap-condition" title="True while two named objects overlap or touch. Use it for pickups, hits, and triggers.">
+                  <div class="block-color" style="background:#f59e0b;"></div>
+                  <div class="block-label">Overlap / Touch</div>
+                </div>
+                <div class="block-option" data-block-type="get-variable" title="Compares a game variable against a value. Example: score >= 10 fires once you reach 10 points.">
+                  <div class="block-color" style="background:#06b6d4;"></div>
+                  <div class="block-label">Variable Check</div>
+                </div>
+                <div class="block-option" data-block-type="and-condition" title="Combines two checks: both must be true (AND) or at least one (OR).">
+                  <div class="block-color" style="background:#2dd4bf;"></div>
+                  <div class="block-label">AND / OR</div>
+                </div>
+                <div class="block-option" data-block-type="timer-condition" title="Fires when a named timer reaches a time you set. Example: a spawn timer at 2 spawns something every 2 seconds.">
+                  <div class="block-color" style="background:#14b8a6;"></div>
+                  <div class="block-label">On Timer</div>
+                </div>
+                <div class="block-option" data-block-type="edge-condition" title="Fires once when something changes, instead of every frame. Use it for one-time events like a first touch.">
+                  <div class="block-color" style="background:#6366f1;"></div>
+                  <div class="block-label">On Screen Edge</div>
+                </div>
+
+                <div class="block-category-label">Actions</div>
+                <div class="block-option" data-block-type="action" title="Applies a force to an object, pushing it in a direction. Pick the object and force in the block settings.">
+                  <div class="block-color action-color"></div>
+                  <div class="block-label">Apply Force</div>
+                </div>
+                <div class="block-option" data-block-type="advanced-action" title="Teleports, rotates, or otherwise changes an object in one step. Pick the operation in the block settings.">
+                  <div class="block-color advanced-action-color"></div>
+                  <div class="block-label">Teleport</div>
+                </div>
+                <div class="block-option" data-block-type="set-camera" title="Moves the camera view to an X and Y world position. The camera stops following any object.">
+                  <div class="block-color" style="background:#38bdf8;"></div>
+                  <div class="block-label">Set Camera</div>
+                </div>
+                <div class="block-option" data-block-type="follow-camera" title="Makes the camera follow an object every frame, with an optional offset.">
+                  <div class="block-color" style="background:#818cf8;"></div>
+                  <div class="block-label">Follow Camera</div>
+                </div>
+                <div class="block-option" data-block-type="set-size" title="Changes an object width and height. Use it to grow, shrink, or resize objects at runtime.">
+                  <div class="block-color" style="background:#0f766e;"></div>
+                  <div class="block-label">Resize Object</div>
+                </div>
+                <div class="block-option" data-block-type="set-variable" title="Sets, adds to, or subtracts from a game variable. Example: add 1 to score when a coin is collected.">
+                  <div class="block-color" style="background:#0ea5e9;"></div>
+                  <div class="block-label">Set Variable</div>
+                </div>
+                <div class="block-option" data-block-type="set-text" title="Changes the text shown by a text object. Example: show the current score on the HUD.">
+                  <div class="block-color" style="background:#a855f7;"></div>
+                  <div class="block-label">Set Text</div>
+                </div>
+                <div class="block-option" data-block-type="destroy-object" title="Deletes an object from the scene. Use it for collected coins, used bullets, and defeated enemies.">
+                  <div class="block-color" style="background:#dc2626;"></div>
+                  <div class="block-label">Destroy Object</div>
+                </div>
+                <div class="block-option" data-block-type="show-hide" title="Shows or hides an object. Hidden objects still exist but are not drawn and cannot be clicked.">
+                  <div class="block-color" style="background:#7c3aed;"></div>
+                  <div class="block-label">Show / Hide</div>
+                </div>
+                <div class="block-option" data-block-type="play-sound" title="Plays a sound asset or a built-in tone. Pick the sound and volume in the block settings.">
+                  <div class="block-color" style="background:#d97706;"></div>
+                  <div class="block-label">Play Sound</div>
+                </div>
+                <div class="block-option" data-block-type="switch-scene" title="Switches to another scene, like a level or a menu screen. The change happens at the end of the frame.">
+                  <div class="block-color" style="background:#059669;"></div>
+                  <div class="block-label">Switch Scene</div>
+                </div>
+                <div class="block-option" data-block-type="set-velocity" title="Sets an object speed directly in X and Y. Use it for steady movement like a patrol or a bullet.">
+                  <div class="block-color" style="background:#f43f5e;"></div>
+                  <div class="block-label">Set Velocity</div>
+                </div>
+                <div class="block-option" data-block-type="spawn-object" title="Creates a new copy of an object at a position you choose. Use it for bullets, enemies, and pickups.">
+                  <div class="block-color" style="background:#22c55e;"></div>
+                  <div class="block-label">Spawn Clone</div>
+                </div>
+                <div class="block-option" data-block-type="rotate-object" title="Rotates an object by an angle you set. Positive angles turn clockwise.">
+                  <div class="block-color" style="background:#fb923c;"></div>
+                  <div class="block-label">Rotate</div>
+                </div>
+                <div class="block-option" data-block-type="random-variable" title="Sets a game variable to a random whole number in a range you choose. Example: roll a die with 1 to 6.">
+                  <div class="block-color" style="background:#c026d3;"></div>
+                  <div class="block-label">Random Variable</div>
+                </div>
+                <div class="block-option" data-block-type="force-toward" title="Pulls or pushes an object toward a point or another object. Use it for gravity wells, magnets, and homing.">
+                  <div class="block-color" style="background:#e11d48;"></div>
+                  <div class="block-label">Force Toward</div>
+                </div>
+                <div class="block-option" data-block-type="play-animation" title="Play one of the object's animations from the first frame. Set up animations in the Inspector.">
+                  <div class="block-color" style="background:#8b5cf6;"></div>
+                  <div class="block-label">Play Animation</div>
+                </div>
+                <div class="block-option" data-block-type="set-animation" title="Switch the object to a different animation without restarting the frame counter.">
+                  <div class="block-color" style="background:#7c3aed;"></div>
+                  <div class="block-label">Set Animation</div>
+                </div>
+                <div class="block-option" data-block-type="stop-animation" title="Stop the object's animation. The object goes back to its static sprite.">
+                  <div class="block-color" style="background:#64748b;"></div>
+                  <div class="block-label">Stop Animation</div>
+                </div>
+                <div class="block-option" data-block-type="animation-finished-condition" title="Fires when a play-once animation has finished. Great for chaining attacks, cutscenes, or respawns.">
+                  <div class="block-color" style="background:#a78bfa;"></div>
+                  <div class="block-label">Animation Finished</div>
+                </div>
+                <div class="block-option" data-block-type="set-anim-state" title="Enter one of the object's animation states. The state's animation starts playing automatically. Build the state list in the Inspector (Animation States section).">
+                  <div class="block-color" style="background:#6d28d9;"></div>
+                  <div class="block-label">Set Animation State</div>
+                </div>
+                <div class="block-option" data-block-type="anim-state-condition" title="True while the object is in the chosen animation state. Use it to drive transitions: state changes stay in your logic grid.">
+                  <div class="block-color" style="background:#c084fc;"></div>
+                  <div class="block-label">Animation State</div>
+                </div>
+                <div class="block-option" data-block-type="set-blend" title="Set the blend space's X and Y values and activate it. Run it every frame from input values to blend between the object's animations by direction.">
+                  <div class="block-color" style="background:#7c3aed;"></div>
+                  <div class="block-label">Set Blend</div>
+                </div>
+                <div class="block-option" data-block-type="stop-blend" title="Stop the object's active blend space. The object goes back to its normal animation.">
+                  <div class="block-color" style="background:#64748b;"></div>
+                  <div class="block-label">Stop Blend</div>
+                </div>
+                <div class="block-option" data-block-type="blend-active-condition" title="True while the object's chosen blend space is active. Build blend spaces in the Inspector (Blend Spaces section).">
+                  <div class="block-color" style="background:#a78bfa;"></div>
+                  <div class="block-label">Blend Active</div>
+                </div>
+                <div class="block-option" data-block-type="tween-property" title="Animate an object's property over time with easing. Try a preset like Fade out or Bounce, or set your own property, target value, and duration.">
+                  <div class="block-color" style="background:#14b8a6;"></div>
+                  <div class="block-label">Tween</div>
+                </div>
+                <div class="block-option" data-block-type="stop-tween" title="Stop the object's running tween(s). The property stays where it is.">
+                  <div class="block-color" style="background:#0d9488;"></div>
+                  <div class="block-label">Stop Tween</div>
+                </div>
+                <div class="block-option" data-block-type="tween-finished-condition" title="Fires when a one-shot tween finishes. Chain pickups, cutscenes, or respawns off it.">
+                  <div class="block-color" style="background:#2dd4bf;"></div>
+                  <div class="block-label">Tween Finished</div>
+                </div>
+
+              </div>
+            </div>
+
+            <div id="properties-panel" class="panel-section" style="display:none;">
+              <h3>Properties</h3>
+              <div class="back-button" id="back-to-blocks-btn">
+                <i class="fas fa-arrow-left"></i> Back to Blocks
+              </div>
+              <div id="properties-content">
+                <p>Select a block to edit its properties</p>
+              </div>
+            </div>
+
+            <button id="clearButton" class="danger-btn"><i class="fas fa-trash"></i> Clear Grid</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PREVIEW TAB ========== -->
+    <div class="tab-content" id="preview-tab">
+      <div class="fullscreen-preview">
+        <div class="preview-device-frame" id="preview-device-frame" data-device="desktop">
+          <div class="preview-device-label" id="preview-device-label" hidden>Desktop</div>
+          <canvas id="game-canvas"></canvas>
+        </div>
+        <div class="preview-controls">
+          <select id="preview-device-select" title="Preview device frame: see the game at phone or tablet size" aria-label="Preview device frame">
+            <option value="desktop">Desktop</option>
+            <option value="phone-portrait">Phone · portrait 390 × 844</option>
+            <option value="phone-landscape">Phone · landscape 844 × 390</option>
+            <option value="tablet-portrait">Tablet · portrait 768 × 1024</option>
+          </select>
+          <button id="preview-restart-btn" title="Restart" aria-label="Restart preview"><i class="fas fa-redo"></i></button>
+          <button id="preview-profiler-btn" title="Profiler overlay: FPS, frame time, and draw counts" aria-label="Toggle profiler overlay"><i class="fas fa-tachometer-alt"></i></button>
+          <button id="preview-trace-btn" title="Flow tracer: watch logic blocks fire, live" aria-label="Toggle flow tracer"><i class="fas fa-route"></i></button>
+        </div>
+        <div class="preview-variables" id="preview-variables-panel">
+          <button type="button" class="preview-variables-header" id="preview-variables-toggle">
+            <span><i class="fas fa-database"></i> Live variables</span>
+            <strong id="preview-variables-count">0</strong>
+          </button>
+          <div class="preview-variables-body" id="preview-variables" hidden>
+            <p class="hint-text">Launch the preview to see live values.</p>
+          </div>
+        </div>
+        <div class="trace-panel" id="trace-panel" hidden>
+          <div class="trace-panel-header"><span><i class="fas fa-route"></i> Flow trace</span><button type="button" id="trace-clear-btn">Clear</button></div>
+          <div class="trace-feed" id="trace-feed"><div class="trace-empty">Tracing is off. Turn on Trace to watch blocks fire.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="diagnostics-dock" id="diagnostics-dock">
+      <button type="button" class="diagnostics-header" id="diagnostics-toggle">
+        <span><i class="fas fa-stethoscope"></i> Diagnostics</span>
+        <strong id="diagnostic-count">0</strong>
+      </button>
+      <div class="diagnostics-feed" id="diagnostic-feed" aria-live="polite">
+        <div class="diagnostic-empty">No runtime diagnostics.</div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ========== STATUS BAR (P5-2 slice a: object count, FPS, error count) ========== -->
+  <footer class="status-bar" id="status-bar" role="contentinfo" aria-label="Editor status">
+    <span class="status-item" id="status-scene" title="Current scene">
+      <i class="fas fa-film" aria-hidden="true"></i>
+      <span class="status-label">Scene</span>
+      <strong id="status-scene-name">—</strong>
+    </span>
+    <span class="status-item" id="status-objects" title="Objects in the current scene">
+      <i class="fas fa-cubes" aria-hidden="true"></i>
+      <strong id="status-object-count">0</strong>
+      <span class="status-label">objects</span>
+    </span>
+    <span class="status-spacer" aria-hidden="true"></span>
+    <span class="status-item" id="status-fps" title="Preview frames per second — live while the Preview tab is playing">
+      <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+      <strong id="status-fps-value">—</strong>
+      <span class="status-label">FPS</span>
+    </span>
+    <button type="button" class="status-item status-diagnostics" id="status-diagnostics" title="Open the diagnostics panel">
+      <i class="fas fa-stethoscope" aria-hidden="true"></i>
+      <strong id="status-diagnostics-count">0</strong>
+      <span class="status-label">diagnostics</span>
+    </button>
+  </footer>
+
+  <!-- ========== NEW PROJECT DIALOG (P3 item 15: templates from the editor) ========== -->
+  <div class="export-dialog-overlay" id="new-project-dialog" role="dialog" aria-modal="true" aria-labelledby="new-project-dialog-title">
+    <div class="export-dialog-panel new-project-panel">
+      <div class="export-dialog-header">
+        <h2 id="new-project-dialog-title"><i class="fas fa-plus"></i> New project</h2>
+        <button type="button" id="new-project-dialog-close" class="export-dialog-close" title="Close" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <p class="export-dialog-intro">Your current project is saved first. Pick a starting template, or Blank Canvas for an empty scene.</p>
+      <div class="new-project-form">
+        <label for="new-project-name">Project name</label>
+        <input type="text" id="new-project-name" placeholder="Untitled Project">
+        <label for="new-project-template">Template</label>
+        <select id="new-project-template"></select>
+        <p class="new-project-desc" id="new-project-template-desc"></p>
+        <div class="new-project-actions">
+          <button type="button" id="new-project-cancel-btn">Cancel</button>
+          <button type="button" id="new-project-create-btn">Create project</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== EXPORT DIALOG (P4 E1 web targets) ========== -->
+  <div class="export-dialog-overlay" id="export-dialog" role="dialog" aria-modal="true" aria-labelledby="export-dialog-title">
+    <div class="export-dialog-panel">
+      <div class="export-dialog-header">
+        <h2 id="export-dialog-title"><i class="fas fa-file-export"></i> Export your game</h2>
+        <button type="button" id="export-dialog-close" class="export-dialog-close" title="Close" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <p class="export-dialog-intro">Pick a target. Every target is a complete, working package. Nothing is a black box: each card says exactly what the engine makes, what you do next, and what cannot be automated.</p>
+      <div class="export-target-cards">
+        <div class="export-card" data-export-target="standalone">
+          <h3><i class="fas fa-file-code"></i> Single HTML file</h3>
+          <p class="export-card-desc">One file with your whole game inside: engine, art, and sound. Double-click it to play, or put it on any website.</p>
+          <p class="export-capabilities"><i class="fas fa-tachometer-alt"></i> Plays offline · any browser · no install · big games make big files</p>
+          <ul class="export-checklist">
+            <li><strong>Engine makes:</strong> one .html file with everything embedded. No internet needed to play it.</li>
+            <li><strong>You do:</strong> click Download and keep the file.</li>
+            <li><strong>Good to know:</strong> big games make big files, because the art and sound live inside the HTML.</li>
+          </ul>
+          <button type="button" class="export-download-btn" id="export-download-standalone">
+            <i class="fas fa-download"></i> Download HTML
+          </button>
+        </div>
+        <div class="export-card" data-export-target="webzip">
+          <h3><i class="fas fa-file-archive"></i> Website ZIP (itch.io)</h3>
+          <p class="export-card-desc">index.html plus an assets folder with your images and audio as separate files. This is the format itch.io expects.</p>
+          <p class="export-capabilities"><i class="fas fa-tachometer-alt"></i> itch.io ready · plays in any browser · no install · needs a web host</p>
+          <ul class="export-checklist">
+            <li><strong>Engine makes:</strong> a ZIP with index.html and an assets/ folder. All paths are relative, so it works from any folder or host.</li>
+            <li><strong>You do:</strong> on itch.io, make a project, upload the ZIP, set Kind of project to HTML, tick "This file will be played in the browser", set the viewport to your scene size, then publish.</li>
+            <li><strong>Cannot be automated:</strong> uploading to your itch.io account and setting page options needs your login, so those steps are yours.</li>
+          </ul>
+          <button type="button" class="export-download-btn" id="export-download-webzip">
+            <i class="fas fa-download"></i> Download ZIP
+          </button>
+        </div>
+        <div class="export-card" data-export-target="pwa">
+          <h3><i class="fas fa-mobile-alt"></i> Installable app (PWA)</h3>
+          <p class="export-card-desc">Everything in the Website ZIP, plus a web manifest, an offline service worker, and app icons. Players can install it to a home screen.</p>
+          <p class="export-capabilities"><i class="fas fa-tachometer-alt"></i> Installs to home screen · plays offline after first visit · needs HTTPS hosting</p>
+          <ul class="export-checklist">
+            <li><strong>Engine makes:</strong> index.html, assets/, manifest.webmanifest, sw.js (offline cache), and 192px + 512px icons drawn from your game's name.</li>
+            <li><strong>You do:</strong> unzip the folder, host it over HTTPS (itch.io, GitHub Pages, and Netlify Drop all work), open the URL once. The browser offers Install, and the game plays offline after the first visit.</li>
+            <li><strong>Cannot be automated:</strong> publishing the folder needs your hosting account, and installing needs a tap from the player. The engine cannot do either for you.</li>
+          </ul>
+          <button type="button" class="export-download-btn" id="export-download-pwa">
+            <i class="fas fa-download"></i> Download PWA ZIP
+          </button>
+        </div>
+        <div class="export-card" data-export-target="desktop">
+          <h3><i class="fas fa-desktop"></i> Desktop app (Electron)</h3>
+          <p class="export-card-desc">A complete Electron project that becomes real Windows, macOS, and Linux installers — not a web page.</p>
+          <p class="export-capabilities"><i class="fas fa-tachometer-alt"></i> Real installers · gamepad + full keyboard work · unsigned builds show an unknown-publisher warning</p>
+          <ul class="export-checklist">
+            <li><strong>Engine makes:</strong> a full buildable project — package.json, a main.js window shell sized to your scene, a 512px icon drawn from your game's name, your game as game/index.html + assets/, and a README with the exact commands.</li>
+            <li><strong>You do:</strong> unzip it, run <button type="button" class="export-cmd" data-cmd="npm install" title="Copy command"><code>npm install</code><i class="fas fa-copy" aria-hidden="true"></i></button> (needs Node.js), then <button type="button" class="export-cmd" data-cmd="npm start" title="Copy command"><code>npm start</code><i class="fas fa-copy" aria-hidden="true"></i></button> to play or <button type="button" class="export-cmd" data-cmd="npm run dist" title="Copy command"><code>npm run dist</code><i class="fas fa-copy" aria-hidden="true"></i></button> to build the installers into dist/. Click a command to copy it.</li>
+            <li><strong>Cannot be automated:</strong> building the binary runs on your computer — a browser cannot do it. The engine never signs or notarizes: unsigned builds play fine but show the usual unknown-publisher warning until you sign with your own certificate. For branded icons, convert build/icon.png to icon.ico / icon.icns; electron-builder picks those names up automatically.</li>
+          </ul>
+          <button type="button" class="export-download-btn" id="export-download-desktop">
+            <i class="fas fa-download"></i> Download Electron project
+          </button>
+        </div>
+        <div class="export-card" data-export-target="android">
+          <h3><i class="fab fa-android"></i> Android app (Capacitor)</h3>
+          <p class="export-card-desc">A complete Capacitor project that becomes a real Android APK — your game wrapped in a native shell.</p>
+          <p class="export-capabilities"><i class="fas fa-tachometer-alt"></i> Real APK · touch works through your input actions · debug build is free · Play Store needs your signing key</p>
+          <ul class="export-checklist">
+            <li><strong>Engine makes:</strong> a full buildable project — package.json, capacitor.config.json, your game as www/index.html + assets/, a 1024px icon and splash drawn from your game's name, and a README with the exact commands.</li>
+            <li><strong>You do:</strong> unzip it, run <button type="button" class="export-cmd" data-cmd="npm install" title="Copy command"><code>npm install</code><i class="fas fa-copy" aria-hidden="true"></i></button>, then <button type="button" class="export-cmd" data-cmd="npx cap add android" title="Copy command"><code>npx cap add android</code><i class="fas fa-copy" aria-hidden="true"></i></button> and <button type="button" class="export-cmd" data-cmd="npx cap sync" title="Copy command"><code>npx cap sync</code><i class="fas fa-copy" aria-hidden="true"></i></button>, then <button type="button" class="export-cmd" data-cmd="npm run build:apk" title="Copy command"><code>npm run build:apk</code><i class="fas fa-copy" aria-hidden="true"></i></button> for a debug APK you can install on your phone. Click a command to copy it.</li>
+            <li><strong>Cannot be automated:</strong> the native project generates on your machine via <code>npx cap add</code> — a browser cannot do it. A Play Store release needs your own signing key.</li>
+          </ul>
+          <button type="button" class="export-download-btn" id="export-download-android">
+            <i class="fas fa-download"></i> Download Android project
+          </button>
+        </div>
+        <div class="export-card" data-export-target="ios">
+          <h3><i class="fab fa-apple"></i> iOS app (Capacitor)</h3>
+          <p class="export-card-desc">A complete Capacitor project that becomes a real iOS app — the same native shell as the Android card, built for iPhone.</p>
+          <p class="export-capabilities"><i class="fas fa-tachometer-alt"></i> Real iOS app · requires macOS + Xcode to build · App Store needs an Apple Developer account</p>
+          <ul class="export-checklist">
+            <li><strong>Engine makes:</strong> the same full buildable project as the Android card — package.json, capacitor.config.json, your game as www/index.html + assets/, a 1024px icon and splash, and a README with the exact commands.</li>
+            <li><strong>You do:</strong> unzip it, run <button type="button" class="export-cmd" data-cmd="npm install" title="Copy command"><code>npm install</code><i class="fas fa-copy" aria-hidden="true"></i></button>, then <button type="button" class="export-cmd" data-cmd="npx cap add ios" title="Copy command"><code>npx cap add ios</code><i class="fas fa-copy" aria-hidden="true"></i></button> and <button type="button" class="export-cmd" data-cmd="npx cap sync" title="Copy command"><code>npx cap sync</code><i class="fas fa-copy" aria-hidden="true"></i></button> on a Mac, then open ios/ in Xcode and build. Click a command to copy it.</li>
+            <li><strong>Cannot be automated:</strong> an iOS binary REQUIRES macOS + Xcode: the engine produces the full iOS project, but Apple builds the binary. An App Store release needs your own Apple Developer account and signing.</li>
+          </ul>
+          <button type="button" class="export-download-btn" id="export-download-ios">
+            <i class="fas fa-download"></i> Download iOS project
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="block-catalog.js?v=20261104-brand1"></script>
+  <script src="hydra-universal.js?v=20261104-brand1"></script>
+  <script src="hydra-expr.js?v=20261104-brand1"></script>
+  <script src="hydra-input.js?v=20261104-brand1"></script>
+  <script src="hydra-audio.js?v=20261104-brand1"></script>
+  <script src="hydra-anim.js?v=20261104-anim1"></script>
+  <script src="hydra-tween.js?v=20261104-tween1"></script>
+  <script src="hydra-ui.js?v=20261104-ui1"></script>
+  <script src="hydra-save.js?v=20261104-save1"></script>
+  <script src="hydra-pause.js?v=20261104-pause1"></script>
+  <script src="hydra-camerafx.js?v=20261105-camerafx1"></script>
+  <script src="hydra-sceneinit.js?v=20261105-sceneinit1"></script>
+  <script src="hydra-frame.js?v=20261105-frame1"></script>
+  <script src="hydra-physicsstep.js?v=20261105-physicsstep1"></script>
+  <script src="hydra-scenereset.js?v=20261105-scenereset1"></script>
+  <script src="hydra-draw.js?v=20261105-draw1"></script>
+  <script src="hydra-dispatch.js?v=20261105-dispatch1"></script>
+  <script src="hydra-conditions.js?v=20261105-conditions1"></script>
+  <script src="hydra-execute.js?v=20261105-execute1"></script>
+  <script src="hydra-particles.js?v=20261104-particles1"></script>
+  <script src="hydra-actions.js?v=20261104-actions1"></script>
+  <script src="hydra-buses.js?v=20261104-buses1"></script>
+  <script src="hydra-tiles.js?v=20261104-tiles1"></script>
+  <script src="hydra-physics2d.js?v=20261104-physics1"></script>
+  <script src="hydra-flow.js?v=20261104-flow1"></script>
+  <script src="hydra-gridmodel.js?v=20261105-gridmodel1"></script>
+  <script src="hydra-propinputs.js?v=20261105-propinputs1"></script>
+  <script src="hydra-stage.js?v=20261105-stage1"></script>
+  <script src="hydra-previewtoolbar.js?v=20261105-previewtoolbar1"></script>
+  <script src="hydra-previewruntime.js?v=20261105-previewruntime1"></script>
+  <script src="hydra-collections.js?v=20261104-collections1"></script>
+  <script src="hydra-math.js?v=20261104-math1"></script>
+  <script src="hydra-pick.js?v=20261104-pick1"></script>
+  <script src="hydra-layerfx.js?v=20261104-layerfx1"></script>
+  <script src="hydra-gltf.js?v=20261104-3d2"></script>
+  <script src="hydra-3d.js?v=20261104-3d1"></script>
+  <script src="hydra-profile.js?v=20261104-profile1"></script>
+  <script src="hydra-scriptapi.js?v=20261104-scriptapi1"></script>
+  <script src="hydra-statemachine.js?v=20261104-statemachine1"></script>
+  <script src="hydra-blendspace.js?v=20261104-blendspace1"></script>
+  <script src="hydra-light2d.js?v=20261104-light2d1"></script>
+  <script src="hydra-joints.js?v=20261104-joints1"></script>
+  <script src="hydra-skeleton.js?v=20261104-skeleton1"></script>
+  <script src="hydra-localization.js?v=20261105-localization1"></script>
+  <script src="hydra-dialogue.js?v=20261105-dialogue1"></script>
+  <script src="hydra-inventory.js?v=20261105-inventory1"></script>
+  <script src="hydra-quest.js?v=20261105-quest1"></script>
+  <script src="hydra-achievement.js?v=20261105-achievement1"></script>
+  <script src="hydra-cutscene.js?v=20261105-cutscene1"></script>
+  <script src="hydra-highscore.js?v=20261105-highscore1"></script>
+  <script src="hydra-timescale.js?v=20261105-timescale1"></script>
+  <script src="hydra-transition.js?v=20261105-transition1"></script>
+  <script src="hydra-camerafeel.js?v=20261106-camerafeel1"></script>
+  <script src="hydra-parallax.js?v=20261106-parallax1"></script>
+  <script src="hydra-spatialaudio.js?v=20261106-spatialaudio1"></script>
+  <script src="hydra-pathfind.js?v=20261106-pathfind1"></script>
+  <script src="hydra-ai.js?v=20261106-ai1"></script>
+  <script src="hydra-joystick.js?v=20261106-joy1"></script>
+  <script src="hydra-health.js?v=20261106-health1"></script>
+  <script src="hydra-damagefx.js?v=20261106-damagefx1"></script>
+  <script src="hydra-respawn.js?v=20261106-respawn1"></script>
+  <script src="hydra-spawn.js?v=20261106-spawn1"></script>
+  <script src="hydra-lives.js?v=20261106-lives1"></script>
+  <script src="hydra-movement.js?v=20261106-movement1"></script>
+  <script src="hydra-platform.js?v=20261106-platform1"></script>
+  <script src="hydra-combat.js?v=20261106-combat1"></script>
+  <script src="hydra-xp.js?v=20261106-xp1"></script>
+  <script src="hydra-growth.js?v=20261106-growth1"></script>
+  <script src="hydra-scaling.js?v=20261106-scaling1"></script>
+  <script src="hydra-boss.js?v=20261107-boss1"></script>
+  <script src="hydra-tags.js?v=20261108-tags1"></script>
+  <script src="hydra-minimap.js?v=20261108-minimap1"></script>
+  <script src="hydra-attach.js?v=20261108-attach1"></script>
+  <script src="hydra-variables.js?v=20261106-variables1"></script>
+  <script src="hydra-functions.js?v=20261106-functions1"></script>
+  <script src="hydra-loops.js?v=20261107-loops1"></script>
+  <script src="hydra-events.js?v=20261107-events1"></script>
+  <script src="hydra-panelresize.js?v=20261106-panelresize1"></script>
+  <script src="hydra-paneldock.js?v=20261107-paneldock1"></script>
+  <script src="hydra-blockdensity.js?v=20261107-density1"></script>
+  <script src="hydra-outliner.js?v=20261107-outliner1"></script>
+  <script src="hydra-forcearrow.js?v=20261107-forcearrow1"></script>
+  <script src="hydra-trace.js?v=20261105-trace1"></script>
+  <script src="hydra-webexport.js?v=20261104-webexport1"></script>
+  <script src="hydra-desktopexport.js?v=20261104-desktop1"></script>
+  <script src="hydra-mobileexport.js?v=20261104-mobile1"></script>
+  <script src="player-runtime.js?v=20261104-brand1"></script>
+  <script src="starter-templates.js?v=20261105-projectjson1"></script>
+  <script src="project.js?v=20261104-brand1"></script>
+  <script src="script.js?v=20261104-brand1"></script>
+  <script src="ui-sounds-temp.js?v=20261107-temp1"></script>
+</body>
+</html>
